@@ -11,6 +11,7 @@ import (
 
 const VERSION = "0.0.0"
 const TAB_WIDTH = 4
+const EXIT_TRIES = 3
 
 const (
 		KEY_BACKSPACE = 127
@@ -403,6 +404,7 @@ func editorRowsToString() string {
 		s := ""
 		for _, row := range editor.row {
 				s += string(row.chars)
+				s += "\n"
 		}
 		return s
 }
@@ -437,6 +439,7 @@ func refreshScreen() {
 		os.Stdin.Write(appendBuffer.chars) // the only write call per refresh
 }
 
+var exitTries = 0
 func processKeypress() {
 		c := readKey()
 
@@ -449,6 +452,11 @@ func processKeypress() {
 
 		// C-q
 		case 17:
+				if editor.fileModified != 0 && exitTries < EXIT_TRIES {
+						setStatusMessage(fmt.Sprintf("File modified, exit without saving? Press C-q %d more times", EXIT_TRIES-exitTries))
+						exitTries++
+						return
+				}
 				normalExit()
 
 		// TODO add C-h
@@ -490,6 +498,8 @@ func processKeypress() {
 		default:
 				insertChar(c)
 		}
+
+		exitTries = 0
 }
 
 // get the dimensions of the used terminal
