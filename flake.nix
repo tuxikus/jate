@@ -12,6 +12,7 @@
         {
           devShell = with pkgs; mkShell {
             buildInputs = [
+              gdb
               go
               gopls
             ];
