@@ -44,6 +44,7 @@ type Editor struct {
 		rows int
 		row []EditorRow
 		filename string
+		fileModified int
 		statusMessage string
 		oldTermState *term.State // used to restore the terminal config after enabling raw mode
 }
@@ -135,6 +136,7 @@ func appendRow(row []byte) {
 		updateRow(&editor.row[at])
 
 		editor.rows++
+		editor.fileModified++
 }
 
 func updateRow(row *EditorRow) {
@@ -330,6 +332,7 @@ func insertChar(c int) {
 		}
 		rowInsertChar(&editor.row[editor.cursorY], editor.cursorX, byte(c))
 		editor.cursorX++
+		editor.fileModified++
 }
 
 func moveCursor(key int) {
@@ -504,6 +507,7 @@ func save() {
 				return
 		}
 
+		// TODO overwrite the open file
 		//file, err := os.Open("./temp.txt")
 		file, err := os.Create("./temp.txt")
 		if err != nil {
@@ -514,6 +518,7 @@ func save() {
 		fileBytes := []byte(editorRowsToString())
 		file.Write(fileBytes)
 		setStatusMessage(fmt.Sprintf("%d bytes saved to disk!", len(fileBytes)))
+		editor.fileModified = 0
 }
 
 func open(filename string) {
@@ -534,12 +539,17 @@ func open(filename string) {
 				}
 				contentAsBytes = append(contentAsBytes, char)
 		}
-
+		editor.fileModified = 0
 }
 
 func drawStatusBar(ab *AppendBuffer) {
 		appendBufferAppend(ab, []byte("\x1b[7m"))
+
 		left := fmt.Sprintf("File: %s", editor.filename)
+		if editor.fileModified != 0 {
+				left += " -modified-"
+		}
+
 		right := fmt.Sprintf("Lines: %d", editor.rows)
 
 		appendBufferAppend(ab, []byte(left))
@@ -570,6 +580,7 @@ func initialize() {
 		editor.row = nil
 		editor.filename = ""
 		editor.statusMessage = ""
+		editor.fileModified = 0
 
 		getTerminalSize()
 
