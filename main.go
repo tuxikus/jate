@@ -10,26 +10,42 @@ import (
 )
 
 const VERSION = "0.0.0"
+const TAB_WIDTH = 4
 
 const (
-		KEY_ARROW_LEFT = 1_000
-		KEY_ARROW_RIGHT = 1_001
-		KEY_ARROW_UP = 1_002
-		KEY_ARROW_DOWN = 1_003
-		KEY_PAGE_UP = 2_000
-		KEY_PAGE_DOWN = 2_001
-		KEY_HOME = 3_000
-		KEY_END = 3_001
-		KEY_DELETE = 4_000
+		KEY_BACKSPACE = 127
+		KEY_ARROW_LEFT = iota + 1000
+		KEY_ARROW_RIGHT
+		KEY_ARROW_UP
+		KEY_ARROW_DOWN
+		KEY_PAGE_UP
+		KEY_PAGE_DOWN
+		KEY_HOME
+		KEY_END
+		KEY_DELETE
 )
+
+type EditorRow struct {
+		length int
+		renderLength int
+		chars []byte
+		render []byte
+}
 
 // struct to hold global editor stuff
 type Editor struct {
-		CursorX int
-		CursorY int
-		Rows int
-		Columns int
-		OldTermState *term.State // used to restore the editor config after enabling raw mode
+		cursorX int
+		cursorY int
+		renderX int
+		rowOffset int // index of row[]
+		columnOffset int // index of row.chars[]
+		screenRows int
+		screenColumns int
+		rows int
+		row []EditorRow
+		filename string
+		statusMessage string
+		oldTermState *term.State // used to restore the terminal config after enabling raw mode
 }
 
 // used to call write only once per refresh
@@ -38,20 +54,30 @@ type AppendBuffer struct {
 }
 
 var editor = Editor{
-		Rows: 0,
-		Columns: 0,
-		OldTermState: nil,
+		screenRows: 0,
+		screenColumns: 0,
+		oldTermState: nil,
 }
 
 func appendBufferAppend(ab *AppendBuffer, chars []byte) {
-		ab.chars = append(ab.chars, chars...) // ... is unpacking
+		ab.chars = append(ab.chars, chars...)
 }
 
+// used for simple debugging
 func printEditorStuff() {
-		fmt.Println("editor.CursorX =", editor.CursorX)
-		fmt.Println("editor.CursorY =", editor.CursorY)
-		fmt.Println("editor.Rows =", editor.Rows)
-		fmt.Println("editor.Columns =", editor.Columns)
+		fmt.Println("editor.cursorX =", editor.cursorX)
+		fmt.Println("editor.cursorY =", editor.cursorY)
+		fmt.Println("editor.rows =", editor.screenRows)
+		fmt.Println("editor.columns =", editor.screenColumns)
+		fmt.Println("editor.rows =", editor.rows)
+		fmt.Println("editor.row.chars =")
+		for _, line := range editor.row {
+				fmt.Println(line.chars, line.length)
+		}
+		fmt.Println("editor.row.render =")
+		for _, line := range editor.row {
+				fmt.Println(line.render, line.renderLength)
+		}
 }
 
 func normalExit() {
@@ -72,20 +98,78 @@ func panicExit(message string) {
 
 func enableRawMode() {
 		var err error
-		editor.OldTermState, err = term.MakeRaw(int(os.Stdin.Fd()))
+		editor.oldTermState, err = term.MakeRaw(int(os.Stdin.Fd()))
 		if err != nil {
 				panic(err)
 		}
 }
 
 func disableRawMode() {
-		term.Restore(int(os.Stdin.Fd()), editor.OldTermState)
+		term.Restore(int(os.Stdin.Fd()), editor.oldTermState)
 }
 
-// in go chars in '' are runes, so just integer (int32) values
+func appendRow(row []byte) {
+		// tempRow := EditorRow{
+		//		chars: row,
+		//		render: nil,
+		//		length: len(row),
+		//		renderLength: 0,
+		// }
+
+		// editor.row = append(editor.row, tempRow)
+		// updateRow(&tempRow)
+		// editor.rows++
+
+		editor.row = append(editor.row, EditorRow{})
+		at := editor.rows
+
+		// TODO make dynamic
+		chars := make([]byte, len(row))
+		copy(chars, row)
+
+		editor.row[at].chars = chars
+		editor.row[at].length = len(row)
+		editor.row[at].render = nil
+		editor.row[at].renderLength = 0
+
+		updateRow(&editor.row[at])
+
+		editor.rows++
+}
+
+func updateRow(row *EditorRow) {
+		// count tabs
+		tabs := 0
+		for _, char := range row.chars {
+				if char == '\t' {
+						tabs++
+				}
+		}
+
+		size := len(row.chars) + tabs * (TAB_WIDTH - 1) + 1
+		row.render = make([]byte, 0, size)
+
+		idx := 0
+		for _, char := range row.chars {
+				if char == '\t' {
+						row.render = append(row.render, '#')
+						idx++
+						for idx % TAB_WIDTH != 0 {
+								row.render = append(row.render, '#')
+								idx++
+						}
+				} else {
+						row.render = append(row.render, char)
+						idx++
+				}
+		}
+
+		row.renderLength = len(row.render)
+}
+
+// in go chars are runes, so just integer (int32) values
 func readKey() int {
 		// use byte instead of byte slice with len 1
-		// ???
 		buf := make([]byte, 1)
 
 		for {
@@ -108,99 +192,240 @@ func readKey() int {
 
 		c := buf[0]
 
-		// if start with escape
+		// if special key
 		if c == '\x1b' {
-				// check the next two bytes
-				seq := make([]byte, 2)
-				n1, err1 := os.Stdin.Read(seq[:1])
-				if err1 != nil || n1 != 1 {
+				buf = make([]byte, 1)
+				if n, err := os.Stdin.Read(buf); err != nil || n != 1 {
 						return '\x1b'
 				}
-				n2, err2 := os.Stdin.Read(seq[1:])
-				if err2 != nil || n2 != 1 {
+				seq0 := buf[0]
+
+				buf = make([]byte, 1)
+				if n, err := os.Stdin.Read(buf); err != nil || n != 1 {
 						return '\x1b'
 				}
+				seq1 := buf[0]
 
 				// if next byte is [
-				if seq[0] == '[' {
-						switch seq[1] {
-						case 'A':
-								return KEY_ARROW_UP
-						case 'B':
-								return KEY_ARROW_DOWN
-						case 'C':
-								return KEY_ARROW_RIGHT
-						case 'D':
-								return KEY_ARROW_LEFT
+				if seq0 == '[' {
+						// detect special keys:
+						// page up:   \x1b[5~ => c = '\x1b'; seq0 = '['; seq1 = '5'; seq2 = '~'
+						// page down: \x1b[5~ => c = '\x1b'; seq0 = '['; seq1 = '6'; seq2 = '~'
+						if seq1 >= '0' && seq1 <= '9' {
+								buf = make([]byte, 1)
+								if n, err := os.Stdin.Read(buf); err != nil || n != 1 {
+										return '\x1b'
+								}
+								seq2 := buf[0]
+
+								if seq2 == '~' {
+										switch seq1 {
+										case '1': return KEY_HOME
+										case '3': return KEY_DELETE
+										case '4': return KEY_END
+										case '5': return KEY_PAGE_UP
+										case '6': return KEY_PAGE_DOWN
+										case '7': return KEY_HOME
+										case '8': return KEY_END
+										}
+								}
+						} else {
+								switch seq1 {
+								case 'A':
+										return KEY_ARROW_UP
+								case 'B':
+										return KEY_ARROW_DOWN
+								case 'C':
+										return KEY_ARROW_RIGHT
+								case 'D':
+										return KEY_ARROW_LEFT
+								case 'H':
+										return KEY_HOME
+								case 'F':
+										return KEY_END
+								}
+						}
+				} else if seq0 == 'O' {
+						switch seq1 {
+						case 'H':
+								return KEY_HOME
+						case 'F':
+								return KEY_END
 						}
 				}
 				// fallback
 				return '\x1b'
 		}
-
 		// return a non escape character
 		return int(c)
 }
 
+func scroll() {
+		editor.renderX = 0
+		if editor.cursorY < editor.rows {
+				editor.renderX = cursorXToRenderX(&editor.row[editor.cursorY], editor.cursorX)
+		}
+
+		if editor.cursorY < editor.rowOffset {
+				editor.rowOffset = editor.cursorY
+		}
+
+		if editor.cursorY >= editor.rowOffset + editor.screenRows {
+				editor.rowOffset = editor.cursorY - editor.screenRows + 1
+		}
+
+		if editor.renderX < editor.columnOffset {
+				editor.columnOffset = editor.renderX
+		}
+
+		if editor.renderX >= editor.columnOffset + editor.screenColumns {
+				editor.columnOffset = editor.renderX - editor.screenColumns + 1
+		}
+}
+
+// visual part of the editor
 func drawRows(ab *AppendBuffer) {
-		for y := range editor.Rows {
-				if y == editor.Rows / 2 {
-						message := fmt.Sprintf("Hello - Version: %s", VERSION)
-						padding := (editor.Columns - len(message)) / 2
-						for padding > 0 {
-								appendBufferAppend(ab, []byte(" "))
-								padding--
+		for y := range editor.screenRows {
+				filerow := y + editor.rowOffset
+				// print ~ after the file content
+				if filerow >= editor.rows {
+						// only display the welcome message if no file is loaded
+						if editor.rows == 0 && y == editor.screenRows / 2 {
+								message := fmt.Sprintf("Hello - Version: %s", VERSION)
+								padding := (editor.screenColumns - len(message)) / 2
+								for padding > 0 {
+										appendBufferAppend(ab, []byte(" "))
+										padding--
+								}
+								appendBufferAppend(ab, []byte(message))
+						} else {
+								appendBufferAppend(ab, []byte("~"))
 						}
-						appendBufferAppend(ab, []byte(message))
 				} else {
-						appendBufferAppend(ab, []byte("~"))
+						max := editor.row[filerow].renderLength - editor.columnOffset
+						appendBufferAppend(ab, editor.row[filerow].render[editor.columnOffset:max])
 				}
 
 				appendBufferAppend(ab, []byte("\x1b[K"))
-				if y < editor.Rows - 1 {
-						appendBufferAppend(ab, []byte("\r\n"))
+				appendBufferAppend(ab, []byte("\r\n"))
+		}
+}
+
+func rowInsertChar(row *EditorRow, at int, char byte) {
+		if at < 0 || at > row.length {
+				at = row.length
+		}
+
+		row.chars = append(row.chars, 0) // add one char to make room for new char
+		copy(row.chars[at+1:], row.chars[at:]) // shift all chars from at to the right
+		row.chars[at] = char // add the char
+
+		row.length++
+		updateRow(row)
+}
+
+func insertChar(c int) {
+		if editor.cursorY == editor.rows {
+				appendRow([]byte(""))
+		}
+		rowInsertChar(&editor.row[editor.cursorY], editor.cursorX, byte(c))
+		editor.cursorX++
+}
+
+func moveCursor(key int) {
+		var row *EditorRow
+
+		if  editor.cursorY >= editor.rows {
+				row = nil
+		} else {
+				row = &editor.row[editor.cursorY]
+		}
+
+
+		switch key {
+		case KEY_ARROW_LEFT:
+				if editor.cursorX != 0 {
+						editor.cursorX--
+				} else if editor.cursorY > 0 {
+						editor.cursorY--
+						editor.cursorX = editor.row[editor.cursorY].length
+				}
+		case KEY_ARROW_RIGHT:
+				if row != nil && editor.cursorX < row.length {
+						editor.cursorX++
+				} else if row != nil && editor.cursorX == row.length {
+						editor.cursorY++
+						editor.cursorX = 0
+				}
+		case KEY_ARROW_UP:
+				if editor.cursorY > 0 {
+						editor.cursorY--
+				}
+		case KEY_ARROW_DOWN:
+				if editor.cursorY < editor.rows {
+						editor.cursorY++
+				}
+		}
+
+
+		if editor.cursorY >= editor.rows {
+				row = nil
+		} else {
+				// get the new row if y changed
+				row = &editor.row[editor.cursorY]
+		}
+
+		// check if cursor is past the row length
+		if row != nil {
+				if editor.cursorX > row.length {
+						editor.cursorX = row.length
 				}
 		}
 }
 
-func moveCursor(key int) {
-		switch key {
-		case KEY_ARROW_LEFT:
-				if editor.CursorX > 0 {
-						editor.CursorX--
+func cursorXToRenderX(row *EditorRow, cursorX int) int {
+		renderX := 0
+		for i := range cursorX {
+				if row.chars[i] == '\t' {
+						// how many columns right to the last tab
+						renderX += TAB_WIDTH - 1 - (renderX % TAB_WIDTH)
 				}
-		case KEY_ARROW_RIGHT:
-				if editor.CursorX < editor.Columns {
-						editor.CursorX++
-				}
-		case KEY_ARROW_UP:
-				if editor.CursorY > 0 {
-						editor.CursorY--
-				}
-		case KEY_ARROW_DOWN:
-				if editor.CursorY < editor.Rows {
-						editor.CursorY++
-				}
+				renderX++
 		}
+
+		return renderX
+}
+
+func editorRowsToString() string {
+		s := ""
+		for _, row := range editor.row {
+				s += string(row.chars)
+		}
+		return s
 }
 
 func refreshScreen() {
 		var appendBuffer AppendBuffer
 
+		scroll()
+
 		// hide the cursor
 		appendBufferAppend(&appendBuffer, []byte("\x1b?25l"))
-		appendBufferAppend(&appendBuffer, []byte("\x1b[2J"))
+
 		// clear the screen
-		//appendBufferAppend(&appendBuffer, []byte("\x1b[2J"))
+		appendBufferAppend(&appendBuffer, []byte("\x1b[2J"))
+
 		// reposition the cursor to the beginning
 		// H: VT100 cursor position
 		// [10;10H move cursor to row 10 and column 10
 		// default is 1;1
 		appendBufferAppend(&appendBuffer, []byte("\x1b[H"))
 
-		drawRows(&appendBuffer)
+		drawRows(&appendBuffer) // screenrows - 2
+		drawStatusBar(&appendBuffer) // screenrows - 1
+		drawMessageBar(&appendBuffer) // screenrows
 
-		cursorVt100 := fmt.Sprintf("\x1b[%d;%dH", editor.CursorY + 1, editor.CursorX + 1)
+		cursorVt100 := fmt.Sprintf("\x1b[%d;%dH", editor.cursorY - editor.rowOffset + 1, editor.renderX - editor.columnOffset + 1)
 		appendBufferAppend(&appendBuffer, []byte(cursorVt100))
 
 		// show the cursor
@@ -209,19 +434,58 @@ func refreshScreen() {
 		os.Stdin.Write(appendBuffer.chars) // the only write call per refresh
 }
 
-func processKey() {
+func processKeypress() {
 		c := readKey()
 
 		switch c {
+		case '\r':
+
+		// C-s
+		case 19:
+				save()
+
 		// C-q
 		case 17:
 				normalExit()
 
+		// TODO add C-h
+		case KEY_BACKSPACE, KEY_DELETE:
+
+
+		case KEY_PAGE_UP:
+				editor.cursorY = editor.rowOffset
+
+				times := editor.screenRows
+				for times > 0 {
+						moveCursor(KEY_ARROW_UP)
+						times--
+				}
+		case KEY_PAGE_DOWN:
+				editor.cursorY = editor.rowOffset + editor.screenRows - 1
+				if editor.cursorY > editor.rows {
+						editor.cursorY = editor.rows
+				}
+
+				times := 0
+				for times < editor.screenRows {
+						moveCursor(KEY_ARROW_DOWN)
+						times++
+				}
+		case KEY_END:
+				if editor.cursorY < editor.rows {
+						editor.cursorX = editor.row[editor.cursorY].length
+				}
+		case KEY_HOME:
+				editor.cursorX = 0
+
 		case KEY_ARROW_DOWN, KEY_ARROW_LEFT, KEY_ARROW_RIGHT, KEY_ARROW_UP:
 				moveCursor(c)
 
+		// C-l
+		case 12:
+				break
 		default:
-				fmt.Println(c)
+				insertChar(c)
 		}
 }
 
@@ -231,23 +495,99 @@ func getTerminalSize() {
 		if err != nil {
 				fmt.Println(err)
 		}
-		editor.Columns = columns
-		editor.Rows = rows
+		editor.screenColumns = columns
+		editor.screenRows = rows
+}
+
+func save() {
+		if editor.filename == "" {
+				return
+		}
+
+		//file, err := os.Open("./temp.txt")
+		file, err := os.Create("./temp.txt")
+		if err != nil {
+				panicExit("save " + err.Error())
+		}
+		defer file.Close()
+
+		fileBytes := []byte(editorRowsToString())
+		file.Write(fileBytes)
+		setStatusMessage(fmt.Sprintf("%d bytes saved to disk!", len(fileBytes)))
+}
+
+func open(filename string) {
+		editor.filename = filename
+
+		content, err := os.ReadFile(filename)
+		if err != nil {
+				panicExit("open")
+		}
+
+		var contentAsBytes []byte
+
+		for _, char := range content {
+				if char == '\n' || char == 10 {
+						appendRow(contentAsBytes)
+						contentAsBytes = nil
+						continue
+				}
+				contentAsBytes = append(contentAsBytes, char)
+		}
+
+}
+
+func drawStatusBar(ab *AppendBuffer) {
+		appendBufferAppend(ab, []byte("\x1b[7m"))
+		left := fmt.Sprintf("File: %s", editor.filename)
+		right := fmt.Sprintf("Lines: %d", editor.rows)
+
+		appendBufferAppend(ab, []byte(left))
+		for range editor.screenColumns - len(left) - len(right) {
+				appendBufferAppend(ab, []byte(" "))
+		}
+		appendBufferAppend(ab, []byte(right))
+		appendBufferAppend(ab, []byte("\x1b[m"))
+		appendBufferAppend(ab, []byte("\r\n"))
+}
+
+func drawMessageBar(ab *AppendBuffer) {
+		appendBufferAppend(ab, []byte("\x1b[K"))
+		appendBufferAppend(ab, []byte(editor.statusMessage))
+}
+
+func setStatusMessage(msg string) {
+		editor.statusMessage = msg
 }
 
 func initialize() {
-		editor.CursorX = 0
-		editor.CursorY = 0
+		editor.cursorX = 0
+		editor.cursorY = 0
+		editor.renderX = 0
+		editor.rows = 0
+		editor.rowOffset = 0
+		editor.columnOffset = 0
+		editor.row = nil
+		editor.filename = ""
+		editor.statusMessage = ""
+
 		getTerminalSize()
+
+		editor.screenRows -= 2 // space for statusbar and status message
 }
 
 func main() {
 		enableRawMode()
 		initialize()
 
+		if len(os.Args) > 1 {
+				open(os.Args[1])
+		}
+
+		setStatusMessage("C-q to quit")
 
 		for {
 				refreshScreen()
-				processKey()
+				processKeypress()
 		}
 }
