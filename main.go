@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"syscall"
+	"unicode"
 
 	"golang.org/x/term" // used to enable raw mode or get the terminal size, maybe change to syscalls directly
 )
@@ -26,6 +27,9 @@ const (
 		KEY_DELETE
 )
 
+// type to store information about a row (line)
+// chars  + length is the content
+// render + renderLength is the rendered content
 type EditorRow struct {
 		length int
 		renderLength int
@@ -33,7 +37,7 @@ type EditorRow struct {
 		render []byte
 }
 
-// struct to hold global editor stuff
+// type to store global editor stuff
 type Editor struct {
 		cursorX int
 		cursorY int
@@ -50,7 +54,7 @@ type Editor struct {
 		oldTermState *term.State // used to restore the terminal config after enabling raw mode
 }
 
-// used to call write only once per refresh
+// used to call 'write' only once per refresh
 type AppendBuffer struct {
 		chars []byte
 }
@@ -110,27 +114,20 @@ func disableRawMode() {
 		term.Restore(int(os.Stdin.Fd()), editor.oldTermState)
 }
 
-func appendRow(row []byte) {
-		// tempRow := EditorRow{
-		//		chars: row,
-		//		render: nil,
-		//		length: len(row),
-		//		renderLength: 0,
-		// }
+func insertRow(at int, s string) {
+		if at < 0 || at > editor.rows {
+				return
+		}
 
-		// editor.row = append(editor.row, tempRow)
-		// updateRow(&tempRow)
-		// editor.rows++
 
+		// new row
 		editor.row = append(editor.row, EditorRow{})
-		at := editor.rows
 
-		// TODO make dynamic
-		chars := make([]byte, len(row))
-		copy(chars, row)
+		// shift rows
+		copy(editor.row[at + 1:], editor.row[at:])
 
-		editor.row[at].chars = chars
-		editor.row[at].length = len(row)
+		editor.row[at].chars = []byte(s)
+		editor.row[at].length = len(editor.row[at].chars)
 		editor.row[at].render = nil
 		editor.row[at].renderLength = 0
 
@@ -139,6 +136,38 @@ func appendRow(row []byte) {
 		editor.rows++
 		editor.fileModified++
 }
+
+
+// func insertRow(row []byte) {
+//		// tempRow := EditorRow{
+//		//		chars: row,
+//		//		render: nil,
+//		//		length: len(row),
+//		//		renderLength: 0,
+//		// }
+
+//		// editor.row = append(editor.row, tempRow)
+//		// updateRow(&tempRow)
+//		// editor.rows++
+
+//		editor.row = append(editor.row, EditorRow{})
+//		at := editor.rows
+
+//		// TODO make dynamic
+//		chars := make([]byte, len(row))
+//		copy(chars, row)
+
+//		editor.row[at].chars = chars
+//		editor.row[at].length = len(row)
+//		editor.row[at].render = nil
+//		editor.row[at].renderLength = 0
+
+//		updateRow(&editor.row[at])
+
+//		editor.rows++
+//		editor.fileModified++
+// }
+
 
 func updateRow(row *EditorRow) {
 		// count tabs
@@ -172,7 +201,6 @@ func updateRow(row *EditorRow) {
 
 // in go chars are runes, so just integer (int32) values
 func readKey() int {
-		// use byte instead of byte slice with len 1
 		buf := make([]byte, 1)
 
 		for {
@@ -314,6 +342,66 @@ func drawRows(ab *AppendBuffer) {
 		}
 }
 
+func deleteRow(at int) {
+		if at < 0 || at >= editor.rows {
+				return
+		}
+
+		// copy(dst, src)
+		copy(editor.row[at:], editor.row[at + 1:])
+		editor.rows--
+		editor.fileModified++
+}
+
+
+
+func rowAppendString(row *EditorRow, s string) {
+		//row.chars = make([]byte, len(row.chars) + len(s))
+		//copy(row.chars[:len(row.chars)], s)
+
+		row.chars = append(row.chars, s...)
+		row.length = len(row.chars)
+		updateRow(row)
+		editor.fileModified++
+}
+
+func rowDeleteChar(row *EditorRow, at int) {
+		if at < 0 ||  at > row.length {
+				return
+		}
+
+		// copy(dst, src)
+		copy(row.chars[at:], row.chars[at + 1:])
+		row.chars = row.chars[:len(row.chars)-1]
+		row.length--
+		updateRow(row)
+		editor.fileModified++
+}
+
+func deleteChar() {
+		// last line + 1
+		if editor.cursorY == editor.rows {
+				return
+		}
+
+		// starting position
+		if editor.cursorX == 0 && editor.cursorY == 0 {
+				return
+		}
+
+		row := &editor.row[editor.cursorY]
+		if editor.cursorX > 0 {
+				rowDeleteChar(&editor.row[editor.cursorY], editor.cursorX - 1)
+				editor.cursorX--
+		} else {
+		// cursor on the beginning of the line => delet this line and append to line above
+				editor.cursorX = editor.row[editor.cursorY - 1].length
+				rowAppendString(&editor.row[editor.cursorY - 1], string(row.chars))
+				deleteRow(editor.cursorY)
+				editor.cursorY--
+		}
+}
+
 func rowInsertChar(row *EditorRow, at int, char byte) {
 		if at < 0 || at > row.length {
 				at = row.length
@@ -329,7 +417,7 @@ func rowInsertChar(row *EditorRow, at int, char byte) {
 
 func insertChar(c int) {
 		if editor.cursorY == editor.rows {
-				appendRow([]byte(""))
+				insertRow(editor.rows, "")
 		}
 		rowInsertChar(&editor.row[editor.cursorY], editor.cursorX, byte(c))
 		editor.cursorX++
@@ -400,7 +488,7 @@ func cursorXToRenderX(row *EditorRow, cursorX int) int {
 		return renderX
 }
 
-func editorRowsToString() string {
+func rowsToString() string {
 		s := ""
 		for _, row := range editor.row {
 				s += string(row.chars)
@@ -443,9 +531,11 @@ var exitTries = 0
 func processKeypress() {
 		c := readKey()
 
+		//setStatusMessage(string(c))
+
 		switch c {
 		case '\r':
-
+				insertNewLine()
 		// C-s
 		case 19:
 				save()
@@ -460,8 +550,12 @@ func processKeypress() {
 				normalExit()
 
 		// TODO add C-h
-		case KEY_BACKSPACE, KEY_DELETE:
+		case KEY_BACKSPACE:
+				deleteChar()
 
+		case KEY_DELETE:
+				moveCursor(KEY_ARROW_RIGHT)
+				deleteChar()
 
 		case KEY_PAGE_UP:
 				editor.cursorY = editor.rowOffset
@@ -514,7 +608,7 @@ func getTerminalSize() {
 
 func save() {
 		if editor.filename == "" {
-				return
+				editor.filename = string(prompt("Save as: "))
 		}
 
 		// TODO overwrite the open file
@@ -525,10 +619,61 @@ func save() {
 		}
 		defer file.Close()
 
-		fileBytes := []byte(editorRowsToString())
+		fileBytes := []byte(rowsToString())
 		file.Write(fileBytes)
 		setStatusMessage(fmt.Sprintf("%d bytes saved to disk!", len(fileBytes)))
 		editor.fileModified = 0
+}
+
+func prompt(prompt string) []byte {
+		bufSize := 128
+		buflen := 0
+		buf := make([]byte, bufSize)
+
+		for {
+				setStatusMessage(prompt)
+				refreshScreen()
+
+				c := readKey()
+				if c == '\x1b' {
+						setStatusMessage("")
+						return nil
+				} else if c == '\r' {
+						if buflen != 0 {
+								setStatusMessage("")
+								return buf[:buflen]
+						} else if !unicode.IsControl(rune(c)) && c < 128 {
+								if buflen == bufSize - 1 {
+										bufSize = bufSize * 2
+										newBuf := make([]byte, bufSize)
+										copy(newBuf, buf)
+										buf = newBuf
+								}
+								buf[buflen] = byte(c)
+								buflen++
+						}
+				}
+		}
+}
+
+func insertNewLine() {
+		if editor.cursorX == 0 {
+				insertRow(editor.cursorY, "")
+		} else {
+				row := &editor.row[editor.cursorY]
+				// insert new line
+				insertRow(editor.cursorY + 1, string(row.chars[editor.cursorX:]))
+
+				// edit old line
+				row = &editor.row[editor.cursorY]
+				// length is now the line break point
+				row.length = editor.cursorX
+				// chars are all up to the cursor location
+				row.chars = row.chars[:editor.cursorX]
+				updateRow(row)
+		}
+		editor.cursorY++
+		editor.cursorX = 0
 }
 
 func open(filename string) {
@@ -543,7 +688,7 @@ func open(filename string) {
 
 		for _, char := range content {
 				if char == '\n' || char == 10 {
-						appendRow(contentAsBytes)
+						insertRow(editor.rows, string(contentAsBytes))
 						contentAsBytes = nil
 						continue
 				}
