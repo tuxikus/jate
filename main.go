@@ -477,6 +477,23 @@ func moveCursor(key int) {
 	}
 }
 
+func renderXtoCursorX(row *EditorRow, renderX int) int {
+	currentRenderX := 0
+
+	for cursorX := 0; cursorX < len(row.chars); cursorX++ {
+		if row.chars[cursorX] == '\t' {
+			currentRenderX += (TAB_WIDTH - 1) - (currentRenderX % TAB_WIDTH)
+		}
+		currentRenderX++
+
+		if currentRenderX > renderX {
+			return cursorX
+		}
+	}
+
+	return len(row.chars)
+}
+
 func cursorXToRenderX(row *EditorRow, cursorX int) int {
 	renderX := 0
 	for i := range cursorX {
@@ -632,45 +649,28 @@ func save() {
 }
 
 func search() {
-	query := prompt("Search: ")
-	if query == nil {
+	query := strings.TrimSpace(string(prompt("Search: ")))
+
+	if query == "" {
 		return
 	}
 
-	setStatusMessage(fmt.Sprintf("Querying for '%s'", query))
-
 	for i, row := range editor.row {
 		s := string(row.chars)
-		if strings.Contains(s, string(query)) {
+		match := strings.Index(s, query)
+		if match != -1 {
 			editor.cursorY = i
-			editor.cursorX = renderXtoCursorX(&row, len(query)-len(row.render))
+			editor.cursorX = renderXtoCursorX(&row, match)
+			editor.rowOffset = editor.rows
+			break
 		}
 	}
-}
-
-func renderXtoCursorX(row *EditorRow, renderX int) int {
-	currentRenderX := 0
-	cursorX := 0
-
-	for _, char := range row.chars {
-		if char == '\t' {
-			currentRenderX += TAB_WIDTH - 1 - (currentRenderX % TAB_WIDTH)
-		}
-		currentRenderX++
-
-		if currentRenderX > renderX {
-			return cursorX
-		}
-		cursorX++
-	}
-
-	return cursorX
 }
 
 func prompt(prompt string) []byte {
 	// bufSize := 128
 	// buflen := 0
-	buf := make([]byte, 1)
+	buf := make([]byte, 0)
 
 	for {
 		setStatusMessage("%s%s", prompt, buf)
