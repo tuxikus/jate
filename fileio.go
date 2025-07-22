@@ -10,7 +10,7 @@ func FileOpen(filename string) {
 
 	content, err := os.ReadFile(filename)
 	if err != nil {
-		panicExit("open")
+		PanicExit("open")
 	}
 
 	var contentAsBytes []byte
@@ -28,14 +28,14 @@ func FileOpen(filename string) {
 
 func FileSave() {
 	if editor.filename == "" {
-		editor.filename = string(prompt("Save as: ", nil))
+		editor.filename = string(Prompt("Save as: ", nil))
 	}
 
 	// TODO overwrite the open file
 	//file, err := os.Open("./temp.txt")
 	file, err := os.Create("./temp.txt")
 	if err != nil {
-		panicExit("save " + err.Error())
+		PanicExit("save " + err.Error())
 	}
 	defer file.Close()
 

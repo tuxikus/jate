@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 	"syscall"
-	"unicode"
 
 	"golang.org/x/term" // used to enable raw mode or get the terminal size, maybe change to syscalls directly
 )
@@ -55,8 +54,6 @@ type Editor struct {
 	oldTermState  *term.State // used to restore the terminal config after enabling raw mode
 }
 
-type PromptCallback func(input []byte, key int)
-
 // used to call 'write' only once per refresh
 type AppendBuffer struct {
 	chars []byte
@@ -88,22 +85,6 @@ func printEditorStuff() {
 	for _, line := range editor.row {
 		fmt.Println(line.render, line.renderLength)
 	}
-}
-
-func normalExit() {
-	os.Stdin.Write([]byte("\x1b[2J")) // clear
-	os.Stdin.Write([]byte("\x1b[H"))  // move cursor to 1 1
-	DisableRawMode()
-	printEditorStuff()
-	os.Exit(0)
-}
-
-func panicExit(message string) {
-	os.Stdin.Write([]byte("\x1b[2J")) // clear
-	os.Stdin.Write([]byte("\x1b[H"))  // move cursor to 1 1
-	DisableRawMode()
-	fmt.Println(message)
-	os.Exit(1)
 }
 
 func insertRow(at int, s string) {
@@ -166,12 +147,12 @@ func readKey() int {
 		n, err := os.Stdin.Read(buf)
 		if err != nil {
 			if err == io.EOF {
-				normalExit()
+				NormalExit()
 				// eagain = no data available right now, try again later
 			} else if err == syscall.EAGAIN {
 				continue
 			} else {
-				panicExit("readKey")
+				PanicExit("readKey")
 			}
 		}
 		// successfully read one byte
@@ -552,7 +533,7 @@ func processKeypress() {
 			exitTries++
 			return
 		}
-		normalExit()
+		NormalExit()
 
 	// TODO add C-h
 	case KEY_BACKSPACE:
@@ -663,50 +644,11 @@ func search() {
 	oldColumnOffset := editor.columnOffset
 	oldRowOffset := editor.rowOffset
 
-	if prompt("Search: ", searchCallback) == nil {
+	if Prompt("Search: ", searchCallback) == nil {
 		editor.cursorX = oldCursorX
 		editor.cursorY = oldCursorY
 		editor.columnOffset = oldColumnOffset
 		editor.rowOffset = oldRowOffset
-	}
-}
-
-func prompt(prompt string, promptCallback PromptCallback) []byte {
-	// bufSize := 128
-	// buflen := 0
-	buf := make([]byte, 0)
-
-	for {
-		setStatusMessage("%s%s", prompt, buf)
-		refreshScreen()
-
-		c := readKey()
-
-		if c == KEY_BACKSPACE {
-			if len(buf) != 0 {
-				buf = buf[:len(buf)-1]
-			}
-		} else if c == '\x1b' {
-			setStatusMessage("")
-			if promptCallback != nil {
-				promptCallback(buf, c)
-			}
-			return nil
-		} else if c == '\r' || c == '\n' {
-			if len(buf) != 0 {
-				setStatusMessage("")
-				return buf[:len(buf)]
-			}
-			if promptCallback != nil {
-				promptCallback(buf, c)
-			}
-		} else if !unicode.IsControl(rune(c)) && c < 128 {
-			buf = append(buf, byte(c))
-		}
-
-		if promptCallback != nil {
-			promptCallback(buf, c)
-		}
 	}
 }
 
