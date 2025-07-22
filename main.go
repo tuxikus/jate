@@ -93,7 +93,7 @@ func printEditorStuff() {
 func normalExit() {
 	os.Stdin.Write([]byte("\x1b[2J")) // clear
 	os.Stdin.Write([]byte("\x1b[H"))  // move cursor to 1 1
-	disableRawMode()
+	DisableRawMode()
 	printEditorStuff()
 	os.Exit(0)
 }
@@ -101,21 +101,9 @@ func normalExit() {
 func panicExit(message string) {
 	os.Stdin.Write([]byte("\x1b[2J")) // clear
 	os.Stdin.Write([]byte("\x1b[H"))  // move cursor to 1 1
-	disableRawMode()
+	DisableRawMode()
 	fmt.Println(message)
 	os.Exit(1)
-}
-
-func enableRawMode() {
-	var err error
-	editor.oldTermState, err = term.MakeRaw(int(os.Stdin.Fd()))
-	if err != nil {
-		panic(err)
-	}
-}
-
-func disableRawMode() {
-	term.Restore(int(os.Stdin.Fd()), editor.oldTermState)
 }
 
 func insertRow(at int, s string) {
@@ -139,36 +127,6 @@ func insertRow(at int, s string) {
 	editor.rows++
 	editor.fileModified++
 }
-
-// func insertRow(row []byte) {
-//		// tempRow := EditorRow{
-//		//		chars: row,
-//		//		render: nil,
-//		//		length: len(row),
-//		//		renderLength: 0,
-//		// }
-
-//		// editor.row = append(editor.row, tempRow)
-//		// updateRow(&tempRow)
-//		// editor.rows++
-
-//		editor.row = append(editor.row, EditorRow{})
-//		at := editor.rows
-
-//		// TODO make dynamic
-//		chars := make([]byte, len(row))
-//		copy(chars, row)
-
-//		editor.row[at].chars = chars
-//		editor.row[at].length = len(row)
-//		editor.row[at].render = nil
-//		editor.row[at].renderLength = 0
-
-//		updateRow(&editor.row[at])
-
-//		editor.rows++
-//		editor.fileModified++
-// }
 
 func updateRow(row *EditorRow) {
 	// count tabs
@@ -818,7 +776,7 @@ func initialize() {
 }
 
 func main() {
-	enableRawMode()
+	EnableRawMode()
 	initialize()
 
 	if len(os.Args) > 1 {
