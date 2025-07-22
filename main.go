@@ -11,7 +11,7 @@ import (
 	"golang.org/x/term" // used to enable raw mode or get the terminal size, maybe change to syscalls directly
 )
 
-const VERSION = "0.0.0"
+const VERSION = "0.0.1"
 const TAB_WIDTH = 4
 const EXIT_TRIES = 3
 
@@ -330,13 +330,35 @@ func drawRows(ab *AppendBuffer) {
 		if filerow >= editor.rows {
 			// only display the welcome message if no file is loaded
 			if editor.rows == 0 && y == editor.screenRows/2 {
-				message := fmt.Sprintf("Hello - Version: %s", VERSION)
-				padding := (editor.screenColumns - len(message)) / 2
+				// message
+				// draw tilde at start of line
+				appendBufferAppend(ab, []byte("~"))
+				// draw line 1
+				messageLine1 := "BITE - batteries included text editor"
+				padding := ((editor.screenColumns - len(messageLine1)) / 2) - 1 // -1 = tilde
 				for padding > 0 {
 					appendBufferAppend(ab, []byte(" "))
 					padding--
 				}
-				appendBufferAppend(ab, []byte(message))
+				appendBufferAppend(ab, []byte(messageLine1))
+
+				// fill line 1 so that line 2 is centered
+				padding = (editor.screenColumns - len(messageLine1)) / 2
+				for padding > 0 {
+					appendBufferAppend(ab, []byte(" "))
+					padding--
+				}
+
+				// draw tilde at start of line
+				appendBufferAppend(ab, []byte("~"))
+				// draw line 2
+				messageLine2 := fmt.Sprintf("Version: %s", VERSION)
+				padding = ((editor.screenColumns - len(messageLine2)) / 2) - 1 // -1 = tilde
+				for padding > 0 {
+					appendBufferAppend(ab, []byte(" "))
+					padding--
+				}
+				appendBufferAppend(ab, []byte(messageLine2))
 			} else {
 				appendBufferAppend(ab, []byte("~"))
 			}
@@ -559,7 +581,7 @@ func processKeypress() {
 
 	// C-s
 	case 19:
-		save()
+		FileSave()
 
 	// C-f
 	case 6:
@@ -629,25 +651,6 @@ func getTerminalSize() {
 	}
 	editor.screenColumns = columns
 	editor.screenRows = rows
-}
-
-func save() {
-	if editor.filename == "" {
-		editor.filename = string(prompt("Save as: ", nil))
-	}
-
-	// TODO overwrite the open file
-	//file, err := os.Open("./temp.txt")
-	file, err := os.Create("./temp.txt")
-	if err != nil {
-		panicExit("save " + err.Error())
-	}
-	defer file.Close()
-
-	fileBytes := []byte(rowsToString())
-	file.Write(fileBytes)
-	setStatusMessage(fmt.Sprintf("%d bytes saved to disk!", len(fileBytes)))
-	editor.fileModified = 0
 }
 
 var lastMatch = -1
@@ -769,27 +772,6 @@ func insertNewLine() {
 	editor.cursorX = 0
 }
 
-func open(filename string) {
-	editor.filename = filename
-
-	content, err := os.ReadFile(filename)
-	if err != nil {
-		panicExit("open")
-	}
-
-	var contentAsBytes []byte
-
-	for _, char := range content {
-		if char == '\n' || char == 10 {
-			insertRow(editor.rows, string(contentAsBytes))
-			contentAsBytes = nil
-			continue
-		}
-		contentAsBytes = append(contentAsBytes, char)
-	}
-	editor.fileModified = 0
-}
-
 func drawStatusBar(ab *AppendBuffer) {
 	appendBufferAppend(ab, []byte("\x1b[7m"))
 
@@ -840,7 +822,7 @@ func main() {
 	initialize()
 
 	if len(os.Args) > 1 {
-		open(os.Args[1])
+		FileOpen(os.Args[1])
 	}
 
 	setStatusMessage("C-q to quit")
