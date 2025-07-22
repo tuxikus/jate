@@ -55,6 +55,8 @@ type Editor struct {
 	oldTermState  *term.State // used to restore the terminal config after enabling raw mode
 }
 
+type PromptCallback func(input []byte, key int)
+
 // used to call 'write' only once per refresh
 type AppendBuffer struct {
 	chars []byte
@@ -631,7 +633,7 @@ func getTerminalSize() {
 
 func save() {
 	if editor.filename == "" {
-		editor.filename = string(prompt("Save as: "))
+		editor.filename = string(prompt("Save as: ", nil))
 	}
 
 	// TODO overwrite the open file
@@ -648,16 +650,14 @@ func save() {
 	editor.fileModified = 0
 }
 
-func search() {
-	query := strings.TrimSpace(string(prompt("Search: ")))
-
-	if query == "" {
+func searchCallback(query []byte, key int) {
+	if key == '\r' || key == '\x1b' {
 		return
 	}
 
 	for i, row := range editor.row {
 		s := string(row.chars)
-		match := strings.Index(s, query)
+		match := strings.Index(s, string(query))
 		if match != -1 {
 			editor.cursorY = i
 			editor.cursorX = renderXtoCursorX(&row, match)
@@ -667,7 +667,11 @@ func search() {
 	}
 }
 
-func prompt(prompt string) []byte {
+func search() {
+	prompt("Search: ", searchCallback)
+}
+
+func prompt(prompt string, promptCallback PromptCallback) []byte {
 	// bufSize := 128
 	// buflen := 0
 	buf := make([]byte, 0)
@@ -684,14 +688,24 @@ func prompt(prompt string) []byte {
 			}
 		} else if c == '\x1b' {
 			setStatusMessage("")
+			if promptCallback != nil {
+				promptCallback(buf, c)
+			}
 			return nil
 		} else if c == '\r' || c == '\n' {
 			if len(buf) != 0 {
 				setStatusMessage("")
 				return buf[:len(buf)]
 			}
+			if promptCallback != nil {
+				promptCallback(buf, c)
+			}
 		} else if !unicode.IsControl(rune(c)) && c < 128 {
 			buf = append(buf, byte(c))
+		}
+
+		if promptCallback != nil {
+			promptCallback(buf, c)
 		}
 	}
 }
