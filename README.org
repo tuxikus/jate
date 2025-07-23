@@ -20,8 +20,8 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
 
 * Todos
 - [ ] fix horizonal files
-- [ ] fix highlighg
-- [ ] add debuggsystem
+- [ ] fix highlighting
+- [ ] add debug system
   - [ ] command system
 - [-] basic Emacs key bindings
   - [X] C-a (beginning-of-line)
