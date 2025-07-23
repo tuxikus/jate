@@ -240,7 +240,7 @@ func drawRows(ab *AppendBuffer) {
 				// draw tilde at start of line
 				appendBufferAppend(ab, []byte("~"))
 				// draw line 1
-				messageLine1 := "BITE - batteries included text editor"
+				messageLine1 := "jate - just another text editor"
 				padding := ((editor.screenColumns - len(messageLine1)) / 2) - 1 // -1 = tilde
 				for padding > 0 {
 					appendBufferAppend(ab, []byte(" "))
