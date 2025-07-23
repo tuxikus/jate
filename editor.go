@@ -53,3 +53,79 @@ func initialize() {
 
 	editor.screenRows -= 2 // space for statusbar and status message
 }
+
+func deleteChar() {
+	// last line + 1
+	if editor.cursorY == editor.rows {
+		return
+	}
+
+	// starting position
+	if editor.cursorX == 0 && editor.cursorY == 0 {
+		return
+	}
+
+	row := &editor.row[editor.cursorY]
+	if editor.cursorX > 0 {
+		rowDeleteChar(&editor.row[editor.cursorY], editor.cursorX-1)
+		editor.cursorX--
+	} else {
+		// cursor on the beginning of the line => delet this line and append to line above
+		editor.cursorX = editor.row[editor.cursorY-1].length
+		rowAppendString(&editor.row[editor.cursorY-1], string(row.chars))
+		deleteRow(editor.cursorY)
+		editor.cursorY--
+	}
+}
+
+func insertChar(c int) {
+	if editor.cursorY == editor.rows {
+		insertRow(editor.rows, "")
+	}
+	rowInsertChar(&editor.row[editor.cursorY], editor.cursorX, byte(c))
+	editor.cursorX++
+	editor.fileModified++
+}
+
+func insertNewLine() {
+	if editor.cursorX == 0 {
+		insertRow(editor.cursorY, "")
+	} else {
+		row := &editor.row[editor.cursorY]
+		// insert new row
+		insertRow(editor.cursorY+1, string(row.chars[editor.cursorX:]))
+
+		// edit old line
+		row = &editor.row[editor.cursorY]
+		// length is now the line break point
+		row.length = editor.cursorX
+		// chars are all up to the cursor location
+		row.chars = row.chars[:editor.cursorX]
+		updateRow(row)
+	}
+	editor.cursorY++
+	editor.cursorX = 0
+}
+
+func scroll() {
+	editor.renderX = 0
+	if editor.cursorY < editor.rows {
+		editor.renderX = cursorXToRenderX(&editor.row[editor.cursorY], editor.cursorX)
+	}
+
+	if editor.cursorY < editor.rowOffset {
+		editor.rowOffset = editor.cursorY
+	}
+
+	if editor.cursorY >= editor.rowOffset+editor.screenRows {
+		editor.rowOffset = editor.cursorY - editor.screenRows + 1
+	}
+
+	if editor.renderX < editor.columnOffset {
+		editor.columnOffset = editor.renderX
+	}
+
+	if editor.renderX >= editor.columnOffset+editor.screenColumns {
+		editor.columnOffset = editor.renderX - editor.screenColumns + 1
+	}
+}

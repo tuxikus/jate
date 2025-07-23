@@ -5,13 +5,11 @@ import "unicode"
 type PromptCallback func(input []byte, key int)
 
 func prompt(prompt string, promptCallback PromptCallback) []byte {
-	// bufSize := 128
-	// buflen := 0
 	buf := make([]byte, 0)
 
 	for {
 		setStatusMessage("%s%s", prompt, buf)
-		refreshScreen()
+		draw()
 
 		c := readKey()
 
