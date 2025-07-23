@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 func deleteRow(at int) {
 	if at < 0 || at >= editor.rows {
 		return
@@ -9,6 +7,11 @@ func deleteRow(at int) {
 
 	// copy(dst, src)
 	copy(editor.row[at:], editor.row[at+1:])
+
+	for i := at; i < editor.rows-1; i++ {
+		editor.row[i].idx--
+	}
+
 	editor.rows--
 	editor.fileModified++
 }
@@ -69,10 +72,18 @@ func insertRow(at int, s string) {
 	// shift rows
 	copy(editor.row[at+1:], editor.row[at:])
 
+	for i := at + 1; i <= editor.rows; i++ {
+		editor.row[i].idx++
+	}
+
+	editor.row[at].idx = at
+
 	editor.row[at].chars = []byte(s)
 	editor.row[at].length = len(editor.row[at].chars)
 	editor.row[at].render = nil
+	editor.row[at].highlight = nil
 	editor.row[at].renderLength = 0
+	editor.row[at].hlOpenComment = 0
 
 	updateRow(&editor.row[at])
 
@@ -108,54 +119,6 @@ func updateRow(row *EditorRow) {
 	}
 
 	row.renderLength = len(row.render)
-}
 
-// visual part of the editor
-func drawRows(ab *AppendBuffer) {
-	for y := range editor.screenRows {
-		filerow := y + editor.rowOffset
-		// print ~ after the file content
-		if filerow >= editor.rows {
-			// only display the welcome message if no file is loaded
-			if editor.rows == 0 && y == editor.screenRows/2 {
-				// message
-				// draw tilde at start of line
-				appendBufferAppend(ab, []byte("~"))
-				// draw line 1
-				messageLine1 := "jate - just another text editor"
-				padding := ((editor.screenColumns - len(messageLine1)) / 2) - 1 // -1 = tilde
-				for padding > 0 {
-					appendBufferAppend(ab, []byte(" "))
-					padding--
-				}
-				appendBufferAppend(ab, []byte(messageLine1))
-
-				// fill line 1 so that line 2 is centered
-				padding = (editor.screenColumns - len(messageLine1)) / 2
-				for padding > 0 {
-					appendBufferAppend(ab, []byte(" "))
-					padding--
-				}
-
-				// draw tilde at start of line
-				appendBufferAppend(ab, []byte("~"))
-				// draw line 2
-				messageLine2 := fmt.Sprintf("Version: %s", VERSION)
-				padding = ((editor.screenColumns - len(messageLine2)) / 2) - 1 // -1 = tilde
-				for padding > 0 {
-					appendBufferAppend(ab, []byte(" "))
-					padding--
-				}
-				appendBufferAppend(ab, []byte(messageLine2))
-			} else {
-				appendBufferAppend(ab, []byte("~"))
-			}
-		} else {
-			max := editor.row[filerow].renderLength - editor.columnOffset
-			appendBufferAppend(ab, editor.row[filerow].render[editor.columnOffset:max])
-		}
-
-		appendBufferAppend(ab, []byte("\x1b[K"))
-		appendBufferAppend(ab, []byte("\r\n"))
-	}
+	updateSyntax(row)
 }

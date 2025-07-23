@@ -4,8 +4,16 @@ import "strings"
 
 var lastMatch = -1
 var searchDirection = 1
+var savedHlLine = 0
+var savedHl []byte = nil
 
 func searchCallback(query []byte, key int) {
+	if savedHl != nil {
+		setStatusMessage("Restoring hl")
+		editor.row[savedHlLine].highlight = savedHl
+		savedHl = nil
+	}
+
 	if key == '\r' || key == '\x1b' {
 		lastMatch = -1
 		searchDirection = 1
@@ -43,6 +51,13 @@ func searchCallback(query []byte, key int) {
 			editor.cursorY = current
 			editor.cursorX = renderXtoCursorX(row, match)
 			editor.rowOffset = editor.rows
+
+			savedHlLine = current
+			savedHl = row.highlight
+
+			for i := match; i < match+len(query); i++ {
+				row.highlight[i] = HL_SEARCH_MATCH
+			}
 			break
 		}
 	}

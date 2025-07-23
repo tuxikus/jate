@@ -8,10 +8,13 @@ import (
 // chars  + length is the content
 // render + renderLength is the rendered content
 type EditorRow struct {
-	length       int
-	renderLength int
-	chars        []byte
-	render       []byte
+	length        int
+	renderLength  int
+	chars         []byte
+	render        []byte
+	highlight     []byte
+	idx           int
+	hlOpenComment int
 }
 
 // type to store global editor stuff
@@ -28,6 +31,7 @@ type Editor struct {
 	filename      string
 	fileModified  int
 	statusMessage string
+	syntax        *Syntax
 	oldTermState  *term.State // used to restore the terminal config after enabling raw mode
 }
 
@@ -48,6 +52,7 @@ func initialize() {
 	editor.filename = ""
 	editor.statusMessage = ""
 	editor.fileModified = 0
+	editor.syntax = nil
 
 	getTerminalSize()
 

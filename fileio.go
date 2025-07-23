@@ -8,6 +8,8 @@ import (
 func fileOpen(filename string) {
 	editor.filename = filename
 
+	selectSyntax()
+
 	content, err := os.ReadFile(filename)
 	if err != nil {
 		panicExit("open")
@@ -30,6 +32,8 @@ func fileSave() {
 	if editor.filename == "" {
 		editor.filename = string(prompt("Save as: ", nil))
 	}
+
+	selectSyntax()
 
 	// TODO overwrite the open file
 	//file, err := os.Open("./temp.txt")

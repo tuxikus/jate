@@ -2,9 +2,12 @@ Hello
 123
 foo,bar,baz
 
+100.20
+100_40
 
-
-
+int main() {
+    printf("Hello, world");
+}
 
         Tab
                 2 tabs

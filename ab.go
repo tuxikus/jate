@@ -8,3 +8,7 @@ type AppendBuffer struct {
 func appendBufferAppend(ab *AppendBuffer, chars []byte) {
 	ab.chars = append(ab.chars, chars...)
 }
+
+func appendBufferAppendByte(ab *AppendBuffer, char byte) {
+	ab.chars = append(ab.chars, char)
+}

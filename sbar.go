@@ -5,7 +5,15 @@ import "fmt"
 func drawStatusBar(ab *AppendBuffer) {
 	appendBufferAppend(ab, []byte("\x1b[7m"))
 
-	left := fmt.Sprintf("File: %s", editor.filename)
+	var fType []byte
+
+	if editor.syntax != nil && editor.syntax.fileType != nil {
+		fType = editor.syntax.fileType
+	} else {
+		fType = []byte("-")
+	}
+
+	left := fmt.Sprintf("Type: %s File: %s", fType, editor.filename)
 	if editor.fileModified != 0 {
 		left += " -modified-"
 	}
