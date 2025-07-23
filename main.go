@@ -217,40 +217,6 @@ func drawRows(ab *AppendBuffer) {
 	}
 }
 
-func deleteRow(at int) {
-	if at < 0 || at >= editor.rows {
-		return
-	}
-
-	// copy(dst, src)
-	copy(editor.row[at:], editor.row[at+1:])
-	editor.rows--
-	editor.fileModified++
-}
-
-func rowAppendString(row *EditorRow, s string) {
-	//row.chars = make([]byte, len(row.chars) + len(s))
-	//copy(row.chars[:len(row.chars)], s)
-
-	row.chars = append(row.chars, s...)
-	row.length = len(row.chars)
-	updateRow(row)
-	editor.fileModified++
-}
-
-func rowDeleteChar(row *EditorRow, at int) {
-	if at < 0 || at > row.length {
-		return
-	}
-
-	// copy(dst, src)
-	copy(row.chars[at:], row.chars[at+1:])
-	row.chars = row.chars[:len(row.chars)-1]
-	row.length--
-	updateRow(row)
-	editor.fileModified++
-}
-
 func deleteChar() {
 	// last line + 1
 	if editor.cursorY == editor.rows {
@@ -273,19 +239,6 @@ func deleteChar() {
 		deleteRow(editor.cursorY)
 		editor.cursorY--
 	}
-}
-
-func rowInsertChar(row *EditorRow, at int, char byte) {
-	if at < 0 || at > row.length {
-		at = row.length
-	}
-
-	row.chars = append(row.chars, 0)       // add one char to make room for new char
-	copy(row.chars[at+1:], row.chars[at:]) // shift all chars from at to the right
-	row.chars[at] = char                   // add the char
-
-	row.length++
-	updateRow(row)
 }
 
 func insertChar(c int) {
@@ -374,15 +327,6 @@ func cursorXToRenderX(row *EditorRow, cursorX int) int {
 	}
 
 	return renderX
-}
-
-func rowsToString() string {
-	s := ""
-	for _, row := range editor.row {
-		s += string(row.chars)
-		s += "\n"
-	}
-	return s
 }
 
 func refreshScreen() {
@@ -486,16 +430,6 @@ func processKeypress() {
 	}
 
 	exitTries = 0
-}
-
-// get the dimensions of the used terminal
-func getTerminalSize() {
-	columns, rows, err := term.GetSize(int(os.Stdin.Fd()))
-	if err != nil {
-		fmt.Println(err)
-	}
-	editor.screenColumns = columns
-	editor.screenRows = rows
 }
 
 var lastMatch = -1
