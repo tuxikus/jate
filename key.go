@@ -8,9 +8,36 @@ import (
 )
 
 const (
-	KEY_C_A = 1 + iota
+	KEY_C_AT = 0 + iota
+	KEY_C_A
 	KEY_C_B
 	KEY_C_C
+	KEY_C_D
+	KEY_C_E
+	KEY_C_F
+	KEY_C_G
+	KEY_C_H
+	KEY_C_I
+	KEY_C_J
+	KEY_C_K
+	KEY_C_L
+	KEY_C_M
+	KEY_C_N
+	KEY_C_O
+	KEY_C_P
+	KEY_C_Q
+	KEY_C_R
+	KEY_C_S
+	KEY_C_T
+	KEY_C_U
+	KEY_C_V
+	KEY_C_W
+	KEY_C_X
+	KEY_C_Y
+	KEY_C_Z
+	KEY_C_OB // opening bracket: [ = esc
+	KEY_C_SLASH
+	KEY_C_CB       // closing bracket
 	KEY_BACKSPACE  = 127
 	KEY_ARROW_LEFT = iota + 1000
 	KEY_ARROW_RIGHT
@@ -32,16 +59,13 @@ func processKeypress() {
 	case '\r':
 		insertNewLine()
 
-	// C-s
-	case 19:
+	case KEY_C_X:
 		fileSave()
 
-	// C-f
-	case 6:
+	case KEY_C_S:
 		search()
 
-	// C-q
-	case 17:
+	case KEY_C_Q:
 		if editor.fileModified != 0 && exitTries < EXIT_TRIES {
 			setStatusMessage(fmt.Sprintf("File modified, exit without saving? Press C-q %d more times", EXIT_TRIES-exitTries))
 			exitTries++
@@ -49,7 +73,6 @@ func processKeypress() {
 		}
 		normalExit()
 
-	// TODO add C-h
 	case KEY_BACKSPACE:
 		deleteChar()
 
@@ -65,6 +88,7 @@ func processKeypress() {
 			moveCursorUp()
 			times--
 		}
+
 	case KEY_PAGE_DOWN:
 		editor.cursorY = editor.rowOffset + editor.screenRows - 1
 		if editor.cursorY > editor.rows {
@@ -76,30 +100,27 @@ func processKeypress() {
 			moveCursorDown()
 			times++
 		}
-	// 5 = C-e
-	case 5, KEY_END:
+
+	case KEY_C_E, KEY_END:
 		if editor.cursorY < editor.rows {
 			editor.cursorX = editor.row[editor.cursorY].length
 		}
-	// 1 = C-a
-	case 1, KEY_HOME:
+
+	case KEY_C_A, KEY_HOME:
 		editor.cursorX = 0
 
-	case KEY_ARROW_DOWN:
+	case KEY_C_N, KEY_ARROW_DOWN:
 		moveCursorDown()
 
-	case 16, KEY_ARROW_UP:
+	case KEY_C_P, KEY_ARROW_UP:
 		moveCursorUp()
 
-	case KEY_ARROW_LEFT:
+	case KEY_C_B, KEY_ARROW_LEFT:
 		moveCursorLeft()
 
-	case KEY_ARROW_RIGHT:
+	case KEY_C_F, KEY_ARROW_RIGHT:
 		moveCursorRight()
 
-	// C-l
-	case 12:
-		break
 	default:
 		insertChar(c)
 	}

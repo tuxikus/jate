@@ -53,7 +53,6 @@ func moveCursorDown() {
 			editor.cursorX = row.length
 		}
 	}
-
 }
 
 func moveCursorLeft() {
@@ -85,7 +84,6 @@ func moveCursorLeft() {
 			editor.cursorX = row.length
 		}
 	}
-
 }
 
 func moveCursorRight() {
