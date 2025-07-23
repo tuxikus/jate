@@ -27,15 +27,6 @@ const (
 	KEY_DELETE
 )
 
-// used to call 'write' only once per refresh
-type AppendBuffer struct {
-	chars []byte
-}
-
-func appendBufferAppend(ab *AppendBuffer, chars []byte) {
-	ab.chars = append(ab.chars, chars...)
-}
-
 // used for simple debugging
 func printEditorStuff() {
 	fmt.Println("editor.filename =", editor.filename)
