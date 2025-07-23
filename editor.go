@@ -36,3 +36,20 @@ var editor = Editor{
 	screenColumns: 0,
 	oldTermState:  nil,
 }
+
+func initialize() {
+	editor.cursorX = 0
+	editor.cursorY = 0
+	editor.renderX = 0
+	editor.rows = 0
+	editor.rowOffset = 0
+	editor.columnOffset = 0
+	editor.row = nil
+	editor.filename = ""
+	editor.statusMessage = ""
+	editor.fileModified = 0
+
+	getTerminalSize()
+
+	editor.screenRows -= 2 // space for statusbar and status message
+}

@@ -395,51 +395,6 @@ func insertNewLine() {
 	editor.cursorX = 0
 }
 
-func drawStatusBar(ab *AppendBuffer) {
-	appendBufferAppend(ab, []byte("\x1b[7m"))
-
-	left := fmt.Sprintf("File: %s", editor.filename)
-	if editor.fileModified != 0 {
-		left += " -modified-"
-	}
-
-	right := fmt.Sprintf("Lines: %d", editor.rows)
-
-	appendBufferAppend(ab, []byte(left))
-	for range editor.screenColumns - len(left) - len(right) {
-		appendBufferAppend(ab, []byte(" "))
-	}
-	appendBufferAppend(ab, []byte(right))
-	appendBufferAppend(ab, []byte("\x1b[m"))
-	appendBufferAppend(ab, []byte("\r\n"))
-}
-
-func drawMessageBar(ab *AppendBuffer) {
-	appendBufferAppend(ab, []byte("\x1b[K"))
-	appendBufferAppend(ab, []byte(editor.statusMessage))
-}
-
-func setStatusMessage(format string, a ...interface{}) {
-	editor.statusMessage = fmt.Sprintf(format, a...)
-}
-
-func initialize() {
-	editor.cursorX = 0
-	editor.cursorY = 0
-	editor.renderX = 0
-	editor.rows = 0
-	editor.rowOffset = 0
-	editor.columnOffset = 0
-	editor.row = nil
-	editor.filename = ""
-	editor.statusMessage = ""
-	editor.fileModified = 0
-
-	getTerminalSize()
-
-	editor.screenRows -= 2 // space for statusbar and status message
-}
-
 func main() {
 	enableRawMode()
 	initialize()
