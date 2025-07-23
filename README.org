@@ -1,2 +1,1 @@
-* Unnamed text editor
-Currently no name.
+* jate - just another text editor
