@@ -27,42 +27,9 @@ const (
 	KEY_DELETE
 )
 
-// type to store information about a row (line)
-// chars  + length is the content
-// render + renderLength is the rendered content
-type EditorRow struct {
-	length       int
-	renderLength int
-	chars        []byte
-	render       []byte
-}
-
-// type to store global editor stuff
-type Editor struct {
-	cursorX       int
-	cursorY       int
-	renderX       int
-	rowOffset     int // index of row[]
-	columnOffset  int // index of row.chars[]
-	screenRows    int
-	screenColumns int
-	rows          int
-	row           []EditorRow
-	filename      string
-	fileModified  int
-	statusMessage string
-	oldTermState  *term.State // used to restore the terminal config after enabling raw mode
-}
-
 // used to call 'write' only once per refresh
 type AppendBuffer struct {
 	chars []byte
-}
-
-var editor = Editor{
-	screenRows:    0,
-	screenColumns: 0,
-	oldTermState:  nil,
 }
 
 func appendBufferAppend(ab *AppendBuffer, chars []byte) {
@@ -147,12 +114,12 @@ func readKey() int {
 		n, err := os.Stdin.Read(buf)
 		if err != nil {
 			if err == io.EOF {
-				NormalExit()
+				normalExit()
 				// eagain = no data available right now, try again later
 			} else if err == syscall.EAGAIN {
 				continue
 			} else {
-				PanicExit("readKey")
+				panicExit("readKey")
 			}
 		}
 		// successfully read one byte
@@ -520,7 +487,7 @@ func processKeypress() {
 
 	// C-s
 	case 19:
-		FileSave()
+		fileSave()
 
 	// C-f
 	case 6:
@@ -533,7 +500,7 @@ func processKeypress() {
 			exitTries++
 			return
 		}
-		NormalExit()
+		normalExit()
 
 	// TODO add C-h
 	case KEY_BACKSPACE:
@@ -644,7 +611,7 @@ func search() {
 	oldColumnOffset := editor.columnOffset
 	oldRowOffset := editor.rowOffset
 
-	if Prompt("Search: ", searchCallback) == nil {
+	if prompt("Search: ", searchCallback) == nil {
 		editor.cursorX = oldCursorX
 		editor.cursorY = oldCursorY
 		editor.columnOffset = oldColumnOffset
@@ -718,11 +685,11 @@ func initialize() {
 }
 
 func main() {
-	EnableRawMode()
+	enableRawMode()
 	initialize()
 
 	if len(os.Args) > 1 {
-		FileOpen(os.Args[1])
+		fileOpen(os.Args[1])
 	}
 
 	setStatusMessage("C-q to quit")

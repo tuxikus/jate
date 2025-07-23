@@ -4,7 +4,7 @@ import "unicode"
 
 type PromptCallback func(input []byte, key int)
 
-func Prompt(prompt string, promptCallback PromptCallback) []byte {
+func prompt(prompt string, promptCallback PromptCallback) []byte {
 	// bufSize := 128
 	// buflen := 0
 	buf := make([]byte, 0)

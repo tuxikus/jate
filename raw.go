@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func EnableRawMode() {
+func enableRawMode() {
 	var err error
 	editor.oldTermState, err = term.MakeRaw(int(os.Stdin.Fd()))
 	if err != nil {
@@ -13,6 +13,6 @@ func EnableRawMode() {
 	}
 }
 
-func DisableRawMode() {
+func disableRawMode() {
 	term.Restore(int(os.Stdin.Fd()), editor.oldTermState)
 }

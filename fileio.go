@@ -5,12 +5,12 @@ import (
 	"os"
 )
 
-func FileOpen(filename string) {
+func fileOpen(filename string) {
 	editor.filename = filename
 
 	content, err := os.ReadFile(filename)
 	if err != nil {
-		PanicExit("open")
+		panicExit("open")
 	}
 
 	var contentAsBytes []byte
@@ -26,16 +26,16 @@ func FileOpen(filename string) {
 	editor.fileModified = 0
 }
 
-func FileSave() {
+func fileSave() {
 	if editor.filename == "" {
-		editor.filename = string(Prompt("Save as: ", nil))
+		editor.filename = string(prompt("Save as: ", nil))
 	}
 
 	// TODO overwrite the open file
 	//file, err := os.Open("./temp.txt")
 	file, err := os.Create("./temp.txt")
 	if err != nil {
-		PanicExit("save " + err.Error())
+		panicExit("save " + err.Error())
 	}
 	defer file.Close()
 

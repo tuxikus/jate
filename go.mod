@@ -1,4 +1,4 @@
-module unnamed-text-editor
+module main
 
 go 1.24.4
 
