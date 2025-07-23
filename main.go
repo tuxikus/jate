@@ -4,15 +4,8 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"syscall"
-
-	"golang.org/x/term" // used to enable raw mode or get the terminal size, maybe change to syscalls directly
 )
-
-const VERSION = "0.0.1"
-const TAB_WIDTH = 4
-const EXIT_TRIES = 3
 
 const (
 	KEY_BACKSPACE  = 127
@@ -164,56 +157,6 @@ func scroll() {
 
 	if editor.renderX >= editor.columnOffset+editor.screenColumns {
 		editor.columnOffset = editor.renderX - editor.screenColumns + 1
-	}
-}
-
-// visual part of the editor
-func drawRows(ab *AppendBuffer) {
-	for y := range editor.screenRows {
-		filerow := y + editor.rowOffset
-		// print ~ after the file content
-		if filerow >= editor.rows {
-			// only display the welcome message if no file is loaded
-			if editor.rows == 0 && y == editor.screenRows/2 {
-				// message
-				// draw tilde at start of line
-				appendBufferAppend(ab, []byte("~"))
-				// draw line 1
-				messageLine1 := "jate - just another text editor"
-				padding := ((editor.screenColumns - len(messageLine1)) / 2) - 1 // -1 = tilde
-				for padding > 0 {
-					appendBufferAppend(ab, []byte(" "))
-					padding--
-				}
-				appendBufferAppend(ab, []byte(messageLine1))
-
-				// fill line 1 so that line 2 is centered
-				padding = (editor.screenColumns - len(messageLine1)) / 2
-				for padding > 0 {
-					appendBufferAppend(ab, []byte(" "))
-					padding--
-				}
-
-				// draw tilde at start of line
-				appendBufferAppend(ab, []byte("~"))
-				// draw line 2
-				messageLine2 := fmt.Sprintf("Version: %s", VERSION)
-				padding = ((editor.screenColumns - len(messageLine2)) / 2) - 1 // -1 = tilde
-				for padding > 0 {
-					appendBufferAppend(ab, []byte(" "))
-					padding--
-				}
-				appendBufferAppend(ab, []byte(messageLine2))
-			} else {
-				appendBufferAppend(ab, []byte("~"))
-			}
-		} else {
-			max := editor.row[filerow].renderLength - editor.columnOffset
-			appendBufferAppend(ab, editor.row[filerow].render[editor.columnOffset:max])
-		}
-
-		appendBufferAppend(ab, []byte("\x1b[K"))
-		appendBufferAppend(ab, []byte("\r\n"))
 	}
 }
 
@@ -430,66 +373,6 @@ func processKeypress() {
 	}
 
 	exitTries = 0
-}
-
-var lastMatch = -1
-var searchDirection = 1
-
-func searchCallback(query []byte, key int) {
-	if key == '\r' || key == '\x1b' {
-		lastMatch = -1
-		searchDirection = 1
-		return
-	} else if key == KEY_ARROW_RIGHT || key == KEY_ARROW_DOWN {
-		searchDirection = 1
-	} else if key == KEY_ARROW_RIGHT || key == KEY_ARROW_UP {
-		searchDirection = -1
-	} else {
-		lastMatch = -1
-		searchDirection = 1
-	}
-
-	if lastMatch == -1 {
-		searchDirection = 1
-	}
-
-	current := lastMatch
-
-	for range editor.row {
-		current += searchDirection
-
-		if current == -1 {
-			current = editor.rows - 1
-		} else if current == editor.rows {
-			current = 0
-		}
-
-		row := &editor.row[current]
-
-		s := string(row.chars)
-		match := strings.Index(s, string(query))
-		if match != -1 {
-			lastMatch = current
-			editor.cursorY = current
-			editor.cursorX = renderXtoCursorX(row, match)
-			editor.rowOffset = editor.rows
-			break
-		}
-	}
-}
-
-func search() {
-	oldCursorX := editor.cursorX
-	oldCursorY := editor.cursorY
-	oldColumnOffset := editor.columnOffset
-	oldRowOffset := editor.rowOffset
-
-	if prompt("Search: ", searchCallback) == nil {
-		editor.cursorX = oldCursorX
-		editor.cursorY = oldCursorY
-		editor.columnOffset = oldColumnOffset
-		editor.rowOffset = oldRowOffset
-	}
 }
 
 func insertNewLine() {
