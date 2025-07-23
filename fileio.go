@@ -35,9 +35,7 @@ func fileSave() {
 
 	selectSyntax()
 
-	// TODO overwrite the open file
-	//file, err := os.Open("./temp.txt")
-	file, err := os.Create("./temp.txt")
+	file, err := os.OpenFile(editor.filename, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		panicExit("save " + err.Error())
 	}

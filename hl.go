@@ -23,6 +23,17 @@ const (
 	HL_HIGHLIGHT_STRINGS
 )
 
+const (
+	BLACK = 30 + iota
+	RED
+	GREEN
+	YELLOW
+	BLUE
+	MAGENTA
+	CYAN
+	WHITE
+)
+
 type Syntax struct {
 	fileType               []byte
 	fileMatch              [][]byte
@@ -37,8 +48,63 @@ type SyntaxDB struct {
 	syntax []Syntax
 }
 
+var goSyntax = Syntax{
+	fileType: []byte("Go"),
+	fileMatch: [][]byte{
+		[]byte(".go"),
+	},
+	keywords: [][]byte{
+		[]byte("break"),
+		[]byte("case"),
+		[]byte("chan"),
+		[]byte("const"),
+		[]byte("continue"),
+		[]byte("default"),
+		[]byte("defer"),
+		[]byte("do"),
+		[]byte("else"),
+		[]byte("fallthrough"),
+		[]byte("for"),
+		[]byte("func"),
+		[]byte("go"),
+		[]byte("if"),
+		[]byte("import"),
+		[]byte("interface"),
+		[]byte("map"),
+		[]byte("package"),
+		[]byte("range"),
+		[]byte("return"),
+		[]byte("select"),
+		[]byte("struct"),
+		[]byte("switch"),
+		[]byte("type"),
+		[]byte("var"),
+		[]byte("string|"),
+		[]byte("bool|"),
+		[]byte("int|"),
+		[]byte("int8|"),
+		[]byte("int16|"),
+		[]byte("int32|"),
+		[]byte("int32|"),
+		[]byte("int64|"),
+		[]byte("uint|"),
+		[]byte("uint8|"),
+		[]byte("uint16|"),
+		[]byte("uint32|"),
+		[]byte("uint64|"),
+		[]byte("float32|"),
+		[]byte("float64|"),
+		[]byte("complex64|"),
+		[]byte("complex128|"),
+	},
+	singleLineCommentStart: []byte("//"),
+	multiLineCommentStart:  nil,
+	multiLineCommentEnd:    nil,
+	flags:                  HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS,
+}
+
 var cSyntax = Syntax{
-	fileType: []byte("c"),
+	fileType: []byte("C"),
 	fileMatch: [][]byte{
 		[]byte(".c"),
 		[]byte(".h"),
@@ -78,6 +144,7 @@ var cSyntax = Syntax{
 var syntaxDB = SyntaxDB{
 	syntax: []Syntax{
 		cSyntax,
+		goSyntax,
 	},
 }
 
@@ -292,18 +359,18 @@ func updateSyntax(row *EditorRow) {
 func syntaxToColor(hl int) int {
 	switch hl {
 	case HL_NUMBER:
-		return 31
+		return RED
 	case HL_KEYWORD1:
-		return 33
+		return GREEN
 	case HL_KEYWORD2:
-		return 32
+		return BLUE
 	case HL_COMMENT, HL_MULTILINE_COMMENT:
-		return 36
+		return MAGENTA
 	case HL_STRING:
-		return 35
+		return CYAN
 	case HL_SEARCH_MATCH:
-		return 34
+		return RED
 	default:
-		return 37
+		return WHITE
 	}
 }

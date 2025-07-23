@@ -1,1 +1,38 @@
 * jate - just another text editor
+I started this project to learn something about text editors, terminals and the programming language go. The
+base of the editor is kilo.c, a small terminal text editor written by [[https://antirez.com/news/108][antirez]]. To learn more about
+the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken/kilo/][tutorial]].
+
+* Setup
+- Go version: 1.24.4
+- Wezterm or ghostty
+
+* Run
+#+begin_src shell
+  go run .
+  go run . test-files/basic.txt
+#+end_src
+
+* Build
+#+begin_src shell
+  go build
+#+end_src
+
+* Todos
+- [ ] fix horizonal files
+- [ ] fix highlighg
+- [ ] add debuggsystem
+  - [ ] command system
+- [-] basic Emacs key bindings
+  - [X] C-a (beginning-of-line)
+  - [X] C-e (end-of-line)
+  - [ ] C-p (previous-line)
+  - [ ] C-n (next-line)
+  - [ ] C-f (forward-char)
+  - [ ] C-b (backward-char)
+  - [ ] M-f (forward-word)
+  - [ ] M-b (backward-word)
+  - [ ] M-m (back-to-indentation)
+- [ ] Vi key bindings
+- [X] real saving (overwrite the current file)
+- [X] add go syntax

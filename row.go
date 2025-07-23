@@ -106,10 +106,10 @@ func updateRow(row *EditorRow) {
 	idx := 0
 	for _, char := range row.chars {
 		if char == '\t' {
-			row.render = append(row.render, '#')
+			row.render = append(row.render, ' ')
 			idx++
 			for idx%TAB_WIDTH != 0 {
-				row.render = append(row.render, '#')
+				row.render = append(row.render, ' ')
 				idx++
 			}
 		} else {

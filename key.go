@@ -7,6 +7,22 @@ import (
 	"syscall"
 )
 
+const (
+	KEY_C_A = 1 + iota
+	KEY_C_B
+	KEY_C_C
+	KEY_BACKSPACE  = 127
+	KEY_ARROW_LEFT = iota + 1000
+	KEY_ARROW_RIGHT
+	KEY_ARROW_UP
+	KEY_ARROW_DOWN
+	KEY_PAGE_UP
+	KEY_PAGE_DOWN
+	KEY_HOME
+	KEY_END
+	KEY_DELETE
+)
+
 var exitTries = 0
 
 func processKeypress() {
@@ -38,7 +54,7 @@ func processKeypress() {
 		deleteChar()
 
 	case KEY_DELETE:
-		moveCursor(KEY_ARROW_RIGHT)
+		moveCursorRight()
 		deleteChar()
 
 	case KEY_PAGE_UP:
@@ -46,7 +62,7 @@ func processKeypress() {
 
 		times := editor.screenRows
 		for times > 0 {
-			moveCursor(KEY_ARROW_UP)
+			moveCursorUp()
 			times--
 		}
 	case KEY_PAGE_DOWN:
@@ -57,18 +73,29 @@ func processKeypress() {
 
 		times := 0
 		for times < editor.screenRows {
-			moveCursor(KEY_ARROW_DOWN)
+			moveCursorDown()
 			times++
 		}
-	case KEY_END:
+	// 5 = C-e
+	case 5, KEY_END:
 		if editor.cursorY < editor.rows {
 			editor.cursorX = editor.row[editor.cursorY].length
 		}
-	case KEY_HOME:
+	// 1 = C-a
+	case 1, KEY_HOME:
 		editor.cursorX = 0
 
-	case KEY_ARROW_DOWN, KEY_ARROW_LEFT, KEY_ARROW_RIGHT, KEY_ARROW_UP:
-		moveCursor(c)
+	case KEY_ARROW_DOWN:
+		moveCursorDown()
+
+	case 16, KEY_ARROW_UP:
+		moveCursorUp()
+
+	case KEY_ARROW_LEFT:
+		moveCursorLeft()
+
+	case KEY_ARROW_RIGHT:
+		moveCursorRight()
 
 	// C-l
 	case 12:
@@ -79,19 +106,6 @@ func processKeypress() {
 
 	exitTries = 0
 }
-
-const (
-	KEY_BACKSPACE  = 127
-	KEY_ARROW_LEFT = iota + 1000
-	KEY_ARROW_RIGHT
-	KEY_ARROW_UP
-	KEY_ARROW_DOWN
-	KEY_PAGE_UP
-	KEY_PAGE_DOWN
-	KEY_HOME
-	KEY_END
-	KEY_DELETE
-)
 
 // in go chars are runes, so just integer (int32) values
 func readKey() int {
