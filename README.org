@@ -33,7 +33,7 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
   - [X] C-d (delete-char)
   - [ ] M-f (forward-word)
   - [ ] M-b (backward-word)
-  - [ ] M-m (back-to-indentation)
+  - [X] M-m (back-to-indentation)
   - [ ] M-d (kill-word)
 - [ ] Vi key bindings
 - [X] real saving (overwrite the current file)

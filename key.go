@@ -160,6 +160,9 @@ func processKeypress() {
 	case '\r':
 		insertNewLine()
 
+	case KEY_C_H:
+		moveCursorToIndentation()
+
 	case KEY_C_X:
 		fileSave()
 

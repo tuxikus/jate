@@ -116,3 +116,22 @@ func moveCursorRight() {
 		}
 	}
 }
+
+func moveCursorToIndentation() {
+	var row *EditorRow
+
+	if editor.cursorY >= editor.rows {
+		row = nil
+	} else {
+		row = &editor.row[editor.cursorY]
+	}
+
+	for i, char := range row.chars {
+		if char == ' ' {
+			editor.cursorX = i
+		} else {
+			editor.cursorX++
+			return
+		}
+	}
+}
