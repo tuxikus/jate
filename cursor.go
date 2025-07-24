@@ -126,12 +126,45 @@ func moveCursorToIndentation() {
 		row = &editor.row[editor.cursorY]
 	}
 
-	for i, char := range row.chars {
+	x := 0
+	for _, char := range row.chars {
 		if char == ' ' {
-			editor.cursorX = i
+			x++
+		}
+	}
+
+	editor.cursorX = x
+}
+
+func moveCursorWordForward() {
+	var row *EditorRow
+
+	if editor.cursorY >= editor.rows {
+		row = nil
+	} else {
+		row = &editor.row[editor.cursorY]
+	}
+
+	inWord := false
+
+	if !isSymbol(row.chars[editor.cursorX]) {
+		inWord = true
+	}
+
+	for i := editor.cursorX; i < len(editor.row[editor.cursorY].chars); i++ {
+		// if in word move the cursor to the end of the word
+		if inWord {
+			if row.chars[editor.cursorX] == ' ' {
+				return
+			}
+			editor.cursorX++
+			// if not in word move the cursor to the next word and
+			// set inWord to true and move to the of this word
 		} else {
 			editor.cursorX++
-			return
+			if !isSymbol(row.chars[editor.cursorX]) {
+				inWord = true
+			}
 		}
 	}
 }

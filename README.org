@@ -31,11 +31,12 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
   - [X] C-f (forward-char)
   - [X] C-b (backward-char)
   - [X] C-d (delete-char)
-  - [ ] M-f (forward-word)
+  - [X] M-f (forward-word)
   - [ ] M-b (backward-word)
   - [X] M-m (back-to-indentation)
     - [X] allow M- key bindings
   - [ ] M-d (kill-word)
+  - [ ] C-k (kill-line)
 - [ ] Vi key bindings
 - [X] real saving (overwrite the current file)
 - [X] remove additional newline at save

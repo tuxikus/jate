@@ -344,6 +344,9 @@ func processKeypress() {
 	case KEY_M_LOWER_M:
 		moveCursorToIndentation()
 
+	case KEY_M_LOWER_F:
+		moveCursorWordForward()
+
 	case KEY_C_X:
 		fileSave()
 
