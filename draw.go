@@ -77,14 +77,17 @@ func drawRows(ab *AppendBuffer) {
 				appendBufferAppend(ab, []byte("~"))
 			}
 		} else {
-			max := editor.row[filerow].renderLength - editor.columnOffset
-			//appendBufferAppend(ab, editor.row[filerow].render[editor.columnOffset:max]) // no highlighting
+			drawStart := min(editor.columnOffset, len(editor.row[filerow].render))
+			drawEnd := min(drawStart+editor.screenColumns, len(editor.row[filerow].render))
+
+			// no color
+			//appendBufferAppend(ab, editor.row[filerow].render[drawStart:drawEnd])
 
 			// some color
-			rowChars := editor.row[filerow].render[editor.columnOffset:max]
-			hl := editor.row[filerow].highlight[editor.columnOffset:max]
+			rowChars := editor.row[filerow].render[drawStart:drawEnd]
+			hl := editor.row[filerow].highlight[drawStart:drawEnd]
 			currentColor := -1
-			for i := range max {
+			for i := range drawEnd {
 				if unicode.IsControl(rune(rowChars[i])) {
 					sym := make([]byte, 0)
 					if rowChars[i] <= 26 {

@@ -19,7 +19,7 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
 #+end_src
 
 * Todos
-- [ ] fix horizonal files
+- [X] fix horizontal files
 - [ ] fix highlighting
 - [ ] add debug system
   - [ ] command system
@@ -37,4 +37,5 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
   - [ ] M-d (kill-word)
 - [ ] Vi key bindings
 - [X] real saving (overwrite the current file)
+- [X] remove additional newline at save
 - [X] add go syntax

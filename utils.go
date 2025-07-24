@@ -11,11 +11,9 @@ func normalExit() {
 	disableRawMode()
 
 	// for _, row := range editor.row {
-	//	fmt.Println(row.render)
-	//	fmt.Println(row.highlight)
+	//	//fmt.Println(row.render)
+	//	fmt.Println(row.chars)
 	// }
-	fmt.Println(savedHlLine)
-	fmt.Println(savedHl)
 
 	os.Exit(0)
 }

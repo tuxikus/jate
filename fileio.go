@@ -35,13 +35,14 @@ func fileSave() {
 
 	selectSyntax()
 
-	file, err := os.OpenFile(editor.filename, os.O_RDWR|os.O_CREATE, 0644)
+	file, err := os.OpenFile(editor.filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		panicExit("save " + err.Error())
 	}
 	defer file.Close()
 
-	fileBytes := []byte(rowsToString())
+	fileString := rowsToString()
+	fileBytes := []byte(fileString)
 	file.Write(fileBytes)
 	setStatusMessage(fmt.Sprintf("%d bytes saved to disk!", len(fileBytes)))
 	editor.fileModified = 0

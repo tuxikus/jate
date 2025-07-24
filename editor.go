@@ -78,7 +78,7 @@ func deleteChar() {
 		// cursor on the beginning of the line => delet this line and append to line above
 		editor.cursorX = editor.row[editor.cursorY-1].length
 		rowAppendString(&editor.row[editor.cursorY-1], string(row.chars))
-		deleteRow(editor.cursorY)
+		rowDelete(editor.cursorY)
 		editor.cursorY--
 	}
 }

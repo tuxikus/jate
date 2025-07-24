@@ -1,11 +1,13 @@
 package main
 
-func deleteRow(at int) {
+// deletes a row from editor.row
+func rowDelete(at int) {
 	if at < 0 || at >= editor.rows {
 		return
 	}
 
 	// copy(dst, src)
+	// copy all rows below at to the index of at
 	copy(editor.row[at:], editor.row[at+1:])
 
 	for i := at; i < editor.rows-1; i++ {
@@ -17,9 +19,6 @@ func deleteRow(at int) {
 }
 
 func rowAppendString(row *EditorRow, s string) {
-	//row.chars = make([]byte, len(row.chars) + len(s))
-	//copy(row.chars[:len(row.chars)], s)
-
 	row.chars = append(row.chars, s...)
 	row.length = len(row.chars)
 	updateRow(row)
@@ -54,10 +53,10 @@ func rowInsertChar(row *EditorRow, at int, char byte) {
 
 func rowsToString() string {
 	s := ""
-	for _, row := range editor.row {
-		s += string(row.chars)
-		s += "\n"
+	for i := range editor.rows {
+		s += string(editor.row[i].chars) + "\n"
 	}
+
 	return s
 }
 
@@ -66,7 +65,7 @@ func insertRow(at int, s string) {
 		return
 	}
 
-	// new row
+	// new empty row
 	editor.row = append(editor.row, EditorRow{})
 
 	// shift rows
@@ -91,6 +90,7 @@ func insertRow(at int, s string) {
 	editor.fileModified++
 }
 
+// build the row.render from row.chars
 func updateRow(row *EditorRow) {
 	// count tabs
 	tabs := 0
@@ -100,7 +100,8 @@ func updateRow(row *EditorRow) {
 		}
 	}
 
-	size := len(row.chars) + tabs*(TAB_WIDTH-1) + 1
+	// TAB_WIDTH - 1 -> /t already a char
+	size := len(row.chars) + tabs*(TAB_WIDTH-1)
 	row.render = make([]byte, 0, size)
 
 	idx := 0
@@ -108,6 +109,7 @@ func updateRow(row *EditorRow) {
 		if char == '\t' {
 			row.render = append(row.render, ' ')
 			idx++
+			// if char is a tab check idx and add needed spaces to fill the tab
 			for idx%TAB_WIDTH != 0 {
 				row.render = append(row.render, ' ')
 				idx++

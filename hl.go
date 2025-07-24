@@ -23,6 +23,7 @@ const (
 	HL_HIGHLIGHT_STRINGS
 )
 
+// colors
 const (
 	BLACK = 30 + iota
 	RED
@@ -148,13 +149,39 @@ var syntaxDB = SyntaxDB{
 	},
 }
 
+func syntaxToColor(hl int) int {
+	switch hl {
+	case HL_NUMBER:
+		return RED
+	case HL_KEYWORD1:
+		return GREEN
+	case HL_KEYWORD2:
+		return BLUE
+	case HL_COMMENT, HL_MULTILINE_COMMENT:
+		return MAGENTA
+	case HL_STRING:
+		return CYAN
+	case HL_SEARCH_MATCH:
+		return RED
+	default:
+		return WHITE
+	}
+}
+
 func selectSyntax() {
 	editor.syntax = nil
 	if editor.filename == "" {
 		return
 	}
 
-	ext := "." + strings.Split(editor.filename, ".")[1]
+	extSplit := strings.Split(editor.filename, ".")
+	ext := ""
+
+	if len(extSplit) > 1 {
+		ext = "." + extSplit[1]
+	} else {
+		return
+	}
 
 	for _, s := range syntaxDB.syntax {
 		for _, match := range s.fileMatch {
@@ -353,24 +380,5 @@ func updateSyntax(row *EditorRow) {
 
 	if changed > 0 && row.idx+1 < editor.rows {
 		updateSyntax(&editor.row[row.idx+1])
-	}
-}
-
-func syntaxToColor(hl int) int {
-	switch hl {
-	case HL_NUMBER:
-		return RED
-	case HL_KEYWORD1:
-		return GREEN
-	case HL_KEYWORD2:
-		return BLUE
-	case HL_COMMENT, HL_MULTILINE_COMMENT:
-		return MAGENTA
-	case HL_STRING:
-		return CYAN
-	case HL_SEARCH_MATCH:
-		return RED
-	default:
-		return WHITE
 	}
 }
