@@ -37,8 +37,10 @@ const (
 	KEY_C_Z
 	KEY_C_OB // opening bracket: [ = esc
 	KEY_C_SLASH
-	KEY_C_CB       // closing bracket
-	KEY_BACKSPACE  = 127
+	KEY_C_CB // closing bracket
+
+	KEY_BACKSPACE = 127
+
 	KEY_ARROW_LEFT = iota + 1000
 	KEY_ARROW_RIGHT
 	KEY_ARROW_UP
@@ -49,84 +51,6 @@ const (
 	KEY_END
 	KEY_DELETE
 )
-
-var exitTries = 0
-
-func processKeypress() {
-	c := readKey()
-
-	switch c {
-	case '\r':
-		insertNewLine()
-
-	case KEY_C_X:
-		fileSave()
-
-	case KEY_C_S:
-		search()
-
-	case KEY_C_Q:
-		if editor.fileModified != 0 && exitTries < EXIT_TRIES {
-			setStatusMessage(fmt.Sprintf("File modified, exit without saving? Press C-q %d more times", EXIT_TRIES-exitTries))
-			exitTries++
-			return
-		}
-		normalExit()
-
-	case KEY_BACKSPACE:
-		deleteChar()
-
-	case KEY_DELETE:
-		moveCursorRight()
-		deleteChar()
-
-	case KEY_PAGE_UP:
-		editor.cursorY = editor.rowOffset
-
-		times := editor.screenRows
-		for times > 0 {
-			moveCursorUp()
-			times--
-		}
-
-	case KEY_PAGE_DOWN:
-		editor.cursorY = editor.rowOffset + editor.screenRows - 1
-		if editor.cursorY > editor.rows {
-			editor.cursorY = editor.rows
-		}
-
-		times := 0
-		for times < editor.screenRows {
-			moveCursorDown()
-			times++
-		}
-
-	case KEY_C_E, KEY_END:
-		if editor.cursorY < editor.rows {
-			editor.cursorX = editor.row[editor.cursorY].length
-		}
-
-	case KEY_C_A, KEY_HOME:
-		editor.cursorX = 0
-
-	case KEY_C_N, KEY_ARROW_DOWN:
-		moveCursorDown()
-
-	case KEY_C_P, KEY_ARROW_UP:
-		moveCursorUp()
-
-	case KEY_C_B, KEY_ARROW_LEFT:
-		moveCursorLeft()
-
-	case KEY_C_F, KEY_ARROW_RIGHT:
-		moveCursorRight()
-
-	default:
-		insertChar(c)
-	}
-
-	exitTries = 0
-}
 
 // in go chars are runes, so just integer (int32) values
 func readKey() int {
@@ -225,4 +149,82 @@ func readKey() int {
 	}
 	// return a non escape character
 	return int(c)
+}
+
+var exitTries = 0
+
+func processKeypress() {
+	c := readKey()
+
+	switch c {
+	case '\r':
+		insertNewLine()
+
+	case KEY_C_X:
+		fileSave()
+
+	case KEY_C_S:
+		search()
+
+	case KEY_C_Q:
+		if editor.fileModified != 0 && exitTries < EXIT_TRIES {
+			setStatusMessage(fmt.Sprintf("File modified, exit without saving? Press C-q %d more times", EXIT_TRIES-exitTries))
+			exitTries++
+			return
+		}
+		normalExit()
+
+	case KEY_BACKSPACE:
+		deleteChar()
+
+	case KEY_C_D, KEY_DELETE:
+		moveCursorRight()
+		deleteChar()
+
+	case KEY_PAGE_UP:
+		editor.cursorY = editor.rowOffset
+
+		times := editor.screenRows
+		for times > 0 {
+			moveCursorUp()
+			times--
+		}
+
+	case KEY_PAGE_DOWN:
+		editor.cursorY = editor.rowOffset + editor.screenRows - 1
+		if editor.cursorY > editor.rows {
+			editor.cursorY = editor.rows
+		}
+
+		times := 0
+		for times < editor.screenRows {
+			moveCursorDown()
+			times++
+		}
+
+	case KEY_C_E, KEY_END:
+		if editor.cursorY < editor.rows {
+			editor.cursorX = editor.row[editor.cursorY].length
+		}
+
+	case KEY_C_A, KEY_HOME:
+		editor.cursorX = 0
+
+	case KEY_C_N, KEY_ARROW_DOWN:
+		moveCursorDown()
+
+	case KEY_C_P, KEY_ARROW_UP:
+		moveCursorUp()
+
+	case KEY_C_B, KEY_ARROW_LEFT:
+		moveCursorLeft()
+
+	case KEY_C_F, KEY_ARROW_RIGHT:
+		moveCursorRight()
+
+	default:
+		insertChar(c)
+	}
+
+	exitTries = 0
 }
