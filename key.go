@@ -105,6 +105,8 @@ const (
 	KEY_M_LOWER_X
 	KEY_M_LOWER_Y
 	KEY_M_LOWER_Z
+
+	KEY_M_COLON
 )
 
 // in go chars are runes, so just integer (int32) values
@@ -322,6 +324,9 @@ func readKey() int {
 				return KEY_M_LOWER_Y
 			case 'z':
 				return KEY_M_LOWER_Z
+
+			case ':':
+				return KEY_M_COLON
 			}
 
 		}
@@ -358,6 +363,9 @@ func processKeypress() {
 
 	case KEY_C_S:
 		search()
+
+	case KEY_M_COLON:
+		executeCommand()
 
 	case KEY_C_Q:
 		if editor.fileModified != 0 && exitTries < EXIT_TRIES {
