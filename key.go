@@ -350,6 +350,9 @@ func processKeypress() {
 	case KEY_M_LOWER_B:
 		moveCursorWordBackward()
 
+	case KEY_C_K:
+		rowDeleteContent(editor.cursorY)
+
 	case KEY_C_X:
 		fileSave()
 

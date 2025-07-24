@@ -18,6 +18,24 @@ func rowDelete(at int) {
 	editor.fileModified++
 }
 
+// delete the content of a row,
+// if the line has no content delete the row
+func rowDeleteContent(at int) {
+	if at < 0 || at >= editor.rows {
+		return
+	}
+
+	row := &editor.row[at]
+
+	if len(row.chars) == 0 {
+		rowDelete(at)
+		return
+	}
+
+	row.chars = make([]byte, 0)
+	updateRow(row)
+}
+
 func rowAppendString(row *EditorRow, s string) {
 	row.chars = append(row.chars, s...)
 	row.length = len(row.chars)

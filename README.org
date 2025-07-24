@@ -36,7 +36,7 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
   - [X] M-m (back-to-indentation)
     - [X] allow M- key bindings
   - [ ] M-d (kill-word)
-  - [ ] C-k (kill-line)
+  - [X] C-k (kill-line)
 - [ ] Vi key bindings
 - [X] fix (back-to-indentation)
 - [ ] fix (forward-word) and (backward-word), both panic at start or end of line
