@@ -128,8 +128,10 @@ func moveCursorToIndentation() {
 
 	x := 0
 	for _, char := range row.chars {
-		if char == ' ' {
+		if char == ' ' || char == '\t' {
 			x++
+		} else {
+			break
 		}
 	}
 
