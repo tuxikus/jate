@@ -45,7 +45,7 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
   - [X] C-k (kill-line)
 - [ ] Vi key bindings
 - [X] fix (back-to-indentation)
-- [ ] fix (forward-word) and (backward-word), both panic at start or end of line
+- [X] fix (forward-word) and (backward-word), both panic at start or end of line
 - [ ] fix (backward-word) by tab at the beginning of the line/row
 - [ ] selection
 - [ ] copy and paste

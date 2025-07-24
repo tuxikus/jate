@@ -147,6 +147,10 @@ func moveCursorWordForward() {
 		row = &editor.row[editor.cursorY]
 	}
 
+	if editor.cursorX >= len(row.chars) {
+		editor.cursorX = len(row.chars) - 1
+	}
+
 	inWord := false
 
 	if !isSymbol(row.chars[editor.cursorX]) {
@@ -182,6 +186,10 @@ func moveCursorWordBackward() {
 
 	inWord := false
 	toNextWord := false
+
+	if editor.cursorX >= len(row.chars) {
+		editor.cursorX = len(row.chars) - 1
+	}
 
 	if !isSymbol(row.chars[editor.cursorX]) {
 		inWord = true
