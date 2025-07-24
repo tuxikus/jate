@@ -5,9 +5,11 @@ import (
 	"io"
 	"os"
 	"syscall"
+	"time"
 )
 
 const (
+	// C- keys ignore case
 	KEY_C_AT = 0 + iota
 	KEY_C_A
 	KEY_C_B
@@ -50,6 +52,59 @@ const (
 	KEY_HOME
 	KEY_END
 	KEY_DELETE
+
+	KEY_M_UPPER_A = iota + 2000
+	KEY_M_UPPER_B
+	KEY_M_UPPER_C
+	KEY_M_UPPER_D
+	KEY_M_UPPER_E
+	KEY_M_UPPER_F
+	KEY_M_UPPER_G
+	KEY_M_UPPER_H
+	KEY_M_UPPER_I
+	KEY_M_UPPER_J
+	KEY_M_UPPER_K
+	KEY_M_UPPER_L
+	KEY_M_UPPER_M
+	KEY_M_UPPER_N
+	KEY_M_UPPER_O
+	KEY_M_UPPER_P
+	KEY_M_UPPER_Q
+	KEY_M_UPPER_R
+	KEY_M_UPPER_S
+	KEY_M_UPPER_T
+	KEY_M_UPPER_U
+	KEY_M_UPPER_V
+	KEY_M_UPPER_W
+	KEY_M_UPPER_X
+	KEY_M_UPPER_Y
+	KEY_M_UPPER_Z
+	KEY_M_LOWER_A
+	KEY_M_LOWER_B
+	KEY_M_LOWER_C
+	KEY_M_LOWER_D
+	KEY_M_LOWER_E
+	KEY_M_LOWER_F
+	KEY_M_LOWER_G
+	KEY_M_LOWER_H
+	KEY_M_LOWER_I
+	KEY_M_LOWER_J
+	KEY_M_LOWER_K
+	KEY_M_LOWER_L
+	KEY_M_LOWER_M
+	KEY_M_LOWER_N
+	KEY_M_LOWER_O
+	KEY_M_LOWER_P
+	KEY_M_LOWER_Q
+	KEY_M_LOWER_R
+	KEY_M_LOWER_S
+	KEY_M_LOWER_T
+	KEY_M_LOWER_U
+	KEY_M_LOWER_V
+	KEY_M_LOWER_W
+	KEY_M_LOWER_X
+	KEY_M_LOWER_Y
+	KEY_M_LOWER_Z
 )
 
 // in go chars are runes, so just integer (int32) values
@@ -78,20 +133,26 @@ func readKey() int {
 
 	// if special key
 	if c == '\x1b' {
+		// set non block true for reading meta (alt) keys
+		fd := int(os.Stdin.Fd())
+		syscall.SetNonblock(fd, true)
+		defer syscall.SetNonblock(fd, false)
+		time.Sleep(1 * time.Millisecond)
+
 		buf = make([]byte, 1)
 		if n, err := os.Stdin.Read(buf); err != nil || n != 1 {
 			return '\x1b'
 		}
 		seq0 := buf[0]
 
-		buf = make([]byte, 1)
-		if n, err := os.Stdin.Read(buf); err != nil || n != 1 {
-			return '\x1b'
-		}
-		seq1 := buf[0]
-
 		// if next byte is [
 		if seq0 == '[' {
+			buf = make([]byte, 1)
+			if n, err := os.Stdin.Read(buf); err != nil || n != 1 {
+				return '\x1b'
+			}
+			seq1 := buf[0]
+
 			// detect special keys:
 			// page up:   \x1b[5~ => c = '\x1b'; seq0 = '['; seq1 = '5'; seq2 = '~'
 			// page down: \x1b[5~ => c = '\x1b'; seq0 = '['; seq1 = '6'; seq2 = '~'
@@ -137,12 +198,132 @@ func readKey() int {
 				}
 			}
 		} else if seq0 == 'O' {
+			buf = make([]byte, 1)
+			if n, err := os.Stdin.Read(buf); err != nil || n != 1 {
+				return '\x1b'
+			}
+			seq1 := buf[0]
+
 			switch seq1 {
 			case 'H':
 				return KEY_HOME
 			case 'F':
 				return KEY_END
 			}
+		} else {
+			// Meta keys
+			// just esc with a letter
+			// a -> \x1ba
+			// b -> \x1bb
+			// c -> \x1bc
+			switch seq0 {
+			case 'A':
+				return KEY_M_UPPER_A
+			case 'B':
+				return KEY_M_UPPER_B
+			case 'C':
+				return KEY_M_UPPER_C
+			case 'D':
+				return KEY_M_UPPER_D
+			case 'E':
+				return KEY_M_UPPER_E
+			case 'F':
+				return KEY_M_UPPER_F
+			case 'G':
+				return KEY_M_UPPER_G
+			case 'H':
+				return KEY_M_UPPER_H
+			case 'I':
+				return KEY_M_UPPER_I
+			case 'J':
+				return KEY_M_UPPER_J
+			case 'K':
+				return KEY_M_UPPER_K
+			case 'L':
+				return KEY_M_UPPER_L
+			case 'M':
+				return KEY_M_UPPER_M
+			case 'N':
+				return KEY_M_UPPER_N
+			case 'O':
+				return KEY_M_UPPER_O
+			case 'P':
+				return KEY_M_UPPER_P
+			case 'Q':
+				return KEY_M_UPPER_Q
+			case 'R':
+				return KEY_M_UPPER_R
+			case 'S':
+				return KEY_M_UPPER_S
+			case 'T':
+				return KEY_M_UPPER_T
+			case 'U':
+				return KEY_M_UPPER_U
+			case 'V':
+				return KEY_M_UPPER_V
+			case 'W':
+				return KEY_M_UPPER_W
+			case 'X':
+				return KEY_M_UPPER_X
+			case 'Y':
+				return KEY_M_UPPER_Y
+			case 'Z':
+				return KEY_M_UPPER_Z
+			// lower
+			case 'a':
+				return KEY_M_LOWER_A
+			case 'b':
+				return KEY_M_LOWER_B
+			case 'c':
+				return KEY_M_LOWER_C
+			case 'd':
+				return KEY_M_LOWER_D
+			case 'e':
+				return KEY_M_LOWER_E
+			case 'f':
+				return KEY_M_LOWER_F
+			case 'g':
+				return KEY_M_LOWER_G
+			case 'h':
+				return KEY_M_LOWER_H
+			case 'i':
+				return KEY_M_LOWER_I
+			case 'j':
+				return KEY_M_LOWER_J
+			case 'k':
+				return KEY_M_LOWER_K
+			case 'l':
+				return KEY_M_LOWER_L
+			case 'm':
+				return KEY_M_LOWER_M
+			case 'n':
+				return KEY_M_LOWER_N
+			case 'o':
+				return KEY_M_LOWER_O
+			case 'p':
+				return KEY_M_LOWER_P
+			case 'q':
+				return KEY_M_LOWER_Q
+			case 'r':
+				return KEY_M_LOWER_R
+			case 's':
+				return KEY_M_LOWER_S
+			case 't':
+				return KEY_M_LOWER_T
+			case 'u':
+				return KEY_M_LOWER_U
+			case 'v':
+				return KEY_M_LOWER_V
+			case 'w':
+				return KEY_M_LOWER_W
+			case 'x':
+				return KEY_M_LOWER_X
+			case 'y':
+				return KEY_M_LOWER_Y
+			case 'z':
+				return KEY_M_LOWER_Z
+			}
+
 		}
 		// fallback
 		return '\x1b'
@@ -160,7 +341,7 @@ func processKeypress() {
 	case '\r':
 		insertNewLine()
 
-	case KEY_C_H:
+	case KEY_M_LOWER_M:
 		moveCursorToIndentation()
 
 	case KEY_C_X:

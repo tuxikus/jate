@@ -88,6 +88,7 @@ func drawRows(ab *AppendBuffer) {
 			hl := editor.row[filerow].highlight[drawStart:drawEnd]
 			currentColor := -1
 			for i := range drawEnd {
+				// print non-printable chars
 				if unicode.IsControl(rune(rowChars[i])) {
 					sym := make([]byte, 0)
 					if rowChars[i] <= 26 {

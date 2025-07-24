@@ -34,6 +34,7 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
   - [ ] M-f (forward-word)
   - [ ] M-b (backward-word)
   - [X] M-m (back-to-indentation)
+    - [X] allow M- key bindings
   - [ ] M-d (kill-word)
 - [ ] Vi key bindings
 - [X] real saving (overwrite the current file)
