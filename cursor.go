@@ -154,7 +154,7 @@ func moveCursorWordForward() {
 	for i := editor.cursorX; i < len(editor.row[editor.cursorY].chars); i++ {
 		// if in word move the cursor to the end of the word
 		if inWord {
-			if row.chars[editor.cursorX] == ' ' {
+			if isSymbol(row.chars[editor.cursorX]) {
 				return
 			}
 			editor.cursorX++
@@ -162,6 +162,58 @@ func moveCursorWordForward() {
 			// set inWord to true and move to the of this word
 		} else {
 			editor.cursorX++
+			if !isSymbol(row.chars[editor.cursorX]) {
+				inWord = true
+			}
+		}
+	}
+}
+
+func moveCursorWordBackward() {
+	var row *EditorRow
+
+	if editor.cursorY >= editor.rows {
+		row = nil
+	} else {
+		row = &editor.row[editor.cursorY]
+	}
+
+	inWord := false
+	toNextWord := false
+
+	if !isSymbol(row.chars[editor.cursorX]) {
+		inWord = true
+
+		if editor.cursorX-1 <= 0 {
+			return
+		}
+
+		if isSymbol(row.chars[editor.cursorX-1]) {
+			setStatusMessage("to next word")
+			toNextWord = true
+			inWord = false
+		}
+	}
+
+	for {
+		if editor.cursorX-1 <= 0 {
+			editor.cursorX = 0
+			return
+		}
+
+		if inWord {
+			if isSymbol(row.chars[editor.cursorX-1]) {
+				return
+			}
+			editor.cursorX--
+		} else if toNextWord {
+			editor.cursorX--
+			if !isSymbol(row.chars[editor.cursorX]) {
+				inWord = true
+				toNextWord = false
+			}
+		} else {
+			editor.cursorX--
 			if !isSymbol(row.chars[editor.cursorX]) {
 				inWord = true
 			}

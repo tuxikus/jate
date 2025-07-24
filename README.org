@@ -32,12 +32,14 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
   - [X] C-b (backward-char)
   - [X] C-d (delete-char)
   - [X] M-f (forward-word)
-  - [ ] M-b (backward-word)
+  - [X] M-b (backward-word)
   - [X] M-m (back-to-indentation)
     - [X] allow M- key bindings
   - [ ] M-d (kill-word)
   - [ ] C-k (kill-line)
 - [ ] Vi key bindings
+- [ ] fix (back-to-indentation)
+- [ ] fix (forward-word) and (backward-word), both panic at start or end of line
 - [X] real saving (overwrite the current file)
 - [X] remove additional newline at save
 - [X] add go syntax

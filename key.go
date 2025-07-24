@@ -347,6 +347,9 @@ func processKeypress() {
 	case KEY_M_LOWER_F:
 		moveCursorWordForward()
 
+	case KEY_M_LOWER_B:
+		moveCursorWordBackward()
+
 	case KEY_C_X:
 		fileSave()
 
