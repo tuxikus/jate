@@ -47,6 +47,7 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
 - [X] fix (back-to-indentation)
 - [X] fix (forward-word) and (backward-word), both panic at start or end of line
 - [ ] fix (backward-word) by tab at the beginning of the line/row
+- [ ] make (forward-word) and (backward-word) go to next or previous line
 - [ ] selection
 - [ ] copy and paste
 - [ ] buffers

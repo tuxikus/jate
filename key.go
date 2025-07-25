@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"syscall"
@@ -369,7 +368,7 @@ func processKeypress() {
 
 	case KEY_C_Q:
 		if editor.fileModified != 0 && exitTries < EXIT_TRIES {
-			setStatusMessage(fmt.Sprintf("File modified, exit without saving? Press C-q %d more times", EXIT_TRIES-exitTries))
+			setStatusMessage("File modified, exit without saving? Press C-q %d more times", EXIT_TRIES-exitTries)
 			exitTries++
 			return
 		}

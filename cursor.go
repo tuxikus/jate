@@ -140,18 +140,36 @@ func moveCursorToIndentation() {
 
 func moveCursorWordForward() {
 	var row *EditorRow
-
 	if editor.cursorY >= editor.rows {
-		row = nil
+		return
 	} else {
 		row = &editor.row[editor.cursorY]
 	}
 
-	if editor.cursorX >= len(row.chars) {
-		editor.cursorX = len(row.chars) - 1
-	}
-
 	inWord := false
+
+	// if cursor at the end of line move to the next line with chars
+	if editor.cursorX >= len(row.chars) {
+		editor.cursorX = 0
+		editor.cursorY++
+
+		if editor.cursorY >= editor.rows {
+			return
+		}
+
+		row = &editor.row[editor.cursorY]
+
+		// find next row with non symbol chars
+		for {
+			if len(row.chars) != 0 && rowContainsLetterOrDigit(row) {
+				return
+			} else {
+				editor.cursorY++
+				row = &editor.row[editor.cursorY]
+			}
+		}
+
+	}
 
 	if !isSymbol(row.chars[editor.cursorX]) {
 		inWord = true
@@ -165,9 +183,20 @@ func moveCursorWordForward() {
 			}
 			editor.cursorX++
 			// if not in word move the cursor to the next word and
-			// set inWord to true and move to the of this word
+			// set inWord to true and move to the end of this word
 		} else {
 			editor.cursorX++
+
+			if editor.cursorX >= len(row.chars) {
+				editor.cursorX = 0
+				editor.cursorY++
+				row = &editor.row[editor.cursorY]
+				for len(row.chars) == 0 {
+					editor.cursorY++
+					row = &editor.row[editor.cursorY]
+				}
+			}
+
 			if !isSymbol(row.chars[editor.cursorX]) {
 				inWord = true
 			}
@@ -182,6 +211,24 @@ func moveCursorWordBackward() {
 		row = nil
 	} else {
 		row = &editor.row[editor.cursorY]
+	}
+
+	// if cursor at the beginning of line move to the previous line with chars
+	if editor.cursorX == 0 {
+		editor.cursorY--
+
+		if editor.cursorY < 0 {
+			return
+		}
+
+		row = &editor.row[editor.cursorY]
+		editor.cursorX = len(row.chars)
+
+		for len(row.chars) == 0 {
+			editor.cursorY--
+			row = &editor.row[editor.cursorY]
+			editor.cursorX = len(row.chars)
+		}
 	}
 
 	inWord := false

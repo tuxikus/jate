@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -44,6 +43,6 @@ func fileSave() {
 	fileString := rowsToString()
 	fileBytes := []byte(fileString)
 	file.Write(fileBytes)
-	setStatusMessage(fmt.Sprintf("%d bytes saved to disk!", len(fileBytes)))
+	setStatusMessage("%d bytes saved to disk", len(fileBytes))
 	editor.fileModified = 0
 }
