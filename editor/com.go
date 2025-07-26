@@ -6,6 +6,7 @@ import (
 
 type Command struct {
 	name       string
+	aliases    []string
 	candidates []string
 }
 
@@ -15,6 +16,10 @@ type Commands struct {
 
 var commands = Commands{
 	commands: []Command{
+		{
+			name:    "quit",
+			aliases: []string{"exit", "q"},
+		},
 		{
 			name:       "get",
 			candidates: []string{"cursorX", "cursorY"},
@@ -34,11 +39,12 @@ func executeCommand() {
 	command := string(prompt(":", nil))
 
 	// TODO use reflection via reflect module
-
-	// get
-	// get editor variables
-	// usage get.cursorX
-	if strings.HasPrefix(command, "get") {
+	if strings.HasPrefix(command, "quit") {
+		normalExit()
+		// get
+		// get editor variables
+		// usage get.cursorX
+	} else if strings.HasPrefix(command, "get") {
 		editorVariable := ""
 		if len(strings.Split(command, ".")) > 1 {
 			editorVariable = strings.Split(command, ".")[1]
@@ -52,10 +58,12 @@ func executeCommand() {
 		case "cursorY":
 			setStatusMessage("%d", editor.cursorY)
 		}
+
 		// set
 	} else if strings.HasPrefix(command, "set") {
 		// TODO implement
 		setStatusMessage("%s", "not implemented yet")
+
 		// open
 	} else if strings.HasPrefix(command, "open") {
 		file := ""

@@ -23,7 +23,9 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
 - [ ] fix highlighting
 - [ ] add debug system
 - [ ] load other files
-- [X] basic command system
+- [-] basic command system
+  - [X] quit command
+  - [ ] command aliases
   - [X] basic tab completion
 - [ ] complex command system
   - [ ] complex tab completion
