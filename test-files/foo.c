@@ -1,3 +1,5 @@
+#incude <stdio.h>
+
 int main() {
-  printf("Hello") // 1 2 3
+  printf("Hello")
 }

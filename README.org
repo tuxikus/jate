@@ -29,10 +29,10 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
   - [ ] complex tab completion
 - [ ] fuzzy finding in completion
 - [ ] make prompt like a minibuffer
-- [ ] status bar upgrades
-  - [ ] display current time
+- [-] status bar upgrades
+  - [X] display current time
   - [ ] display git branch
-  - [ ] display current line
+  - [X] display current line
 - [ ] prefix key
 - [-] basic Emacs key bindings
   - [X] C-a (beginning-of-line)
@@ -60,3 +60,4 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
 - [X] real saving (overwrite the current file)
 - [X] remove additional newline at save
 - [X] add go syntax
+- [ ] utf-8
