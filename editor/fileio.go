@@ -1,17 +1,35 @@
-package main
+package editor
 
 import (
 	"os"
 )
 
-func fileOpen(filename string) {
-	editor.filename = filename
+func FileOpen(filename string) {
+	if editor.filename == "" {
+		editor.filename = filename
+	} else {
+		// if file already loaded, reset editor
+		// TODO function
+		editor.cursorX = 0
+		editor.cursorY = 0
+		editor.renderX = 0
+		editor.rows = 0
+		editor.rowOffset = 0
+		editor.columnOffset = 0
+		editor.row = nil
+		editor.filename = ""
+		editor.statusMessage = ""
+		editor.fileModified = 0
+		editor.syntax = nil
+
+		editor.filename = filename
+	}
 
 	selectSyntax()
 
 	content, err := os.ReadFile(filename)
 	if err != nil {
-		panicExit("open")
+		panicExit("open\n" + err.Error())
 	}
 
 	var contentAsBytes []byte

@@ -28,6 +28,11 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
 - [ ] complex command system
   - [ ] complex tab completion
 - [ ] fuzzy finding in completion
+- [ ] make prompt like a minibuffer
+- [ ] status bar upgrades
+  - [ ] display current time
+  - [ ] display git branch
+  - [ ] display current line
 - [ ] prefix key
 - [-] basic Emacs key bindings
   - [X] C-a (beginning-of-line)

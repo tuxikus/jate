@@ -1,4 +1,4 @@
-package main
+package editor
 
 import (
 	"fmt"
@@ -51,37 +51,48 @@ func prompt(prompt string, promptCallback PromptCallback) []byte {
 			buf = append(buf, byte(c))
 			// completion
 		} else if c == '\t' {
-			cycle := func() {
-				buf = []byte(fmt.Sprintf("%s.%s", lastCommand, lastCommandCandidates[lastCommandCandidateIdx]))
-
-				if lastCommandCandidateIdx == len(lastCommandCandidates)-1 {
-					lastCommandCandidateIdx = 0
-				} else {
-					lastCommandCandidateIdx++
-				}
-			}
-
-			if lastCommand == "" {
-				promptContent := string(buf)
-
-				// get command
-				promptCommand := strings.Split(promptContent, ".")[0] // TODO check length
-
-				for _, command := range commands.commands {
-					if command.name == promptCommand {
-						lastCommand = command.name
-						lastCommandCandidates = command.candidates
-						cycle()
-						break
-					}
-				}
-			} else {
-				cycle()
-			}
+			completion(&buf)
 		}
 
 		if promptCallback != nil {
 			promptCallback(buf, c)
 		}
 	}
+}
+
+func completion(buf *[]byte) {
+	if lastCommand == "" {
+		promptContent := string(*buf)
+
+		// no command to complete
+		if !strings.Contains(promptContent, ".") {
+			return
+		}
+
+		// get command
+		promptCommand := strings.Split(promptContent, ".")[0] // TODO check length
+
+		for _, command := range commands.commands {
+			if command.name == promptCommand {
+				lastCommand = command.name
+				lastCommandCandidates = command.candidates
+				cycleCompletion(buf)
+				break
+			}
+		}
+	} else {
+		cycleCompletion(buf)
+	}
+
+}
+
+func cycleCompletion(buf *[]byte) {
+	*buf = []byte(fmt.Sprintf("%s.%s", lastCommand, lastCommandCandidates[lastCommandCandidateIdx]))
+
+	if lastCommandCandidateIdx == len(lastCommandCandidates)-1 {
+		lastCommandCandidateIdx = 0
+	} else {
+		lastCommandCandidateIdx++
+	}
+
 }

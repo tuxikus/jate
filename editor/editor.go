@@ -1,7 +1,8 @@
-package main
+package editor
 
 import (
 	"golang.org/x/term" // used to enable raw mode or get the terminal size, maybe change to syscalls directly
+	"os"
 )
 
 // type to store information about a row (line)
@@ -41,7 +42,20 @@ var editor = Editor{
 	oldTermState:  nil,
 }
 
-func initialize() {
+func (e *Editor) setStatusMessage(msg string) {
+	e.statusMessage = msg
+}
+
+func Run() {
+	for {
+		draw()
+		processKeypress()
+	}
+}
+
+func Initialize() {
+	enableRawMode()
+
 	editor.cursorX = 0
 	editor.cursorY = 0
 	editor.renderX = 0
@@ -54,9 +68,33 @@ func initialize() {
 	editor.fileModified = 0
 	editor.syntax = nil
 
-	getTerminalSize()
+	columns, rows := getTerminalSize()
+	editor.screenColumns = columns
+	editor.screenRows = rows
 
 	editor.screenRows -= 2 // space for statusbar and status message
+}
+
+// get the dimensions of the used terminal
+func getTerminalSize() (int, int) {
+	columns, rows, err := term.GetSize(int(os.Stdin.Fd()))
+	if err != nil {
+		// TODO
+	}
+
+	return columns, rows
+}
+
+func enableRawMode() {
+	var err error
+	editor.oldTermState, err = term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		panic(err)
+	}
+}
+
+func disableRawMode() {
+	term.Restore(int(os.Stdin.Fd()), editor.oldTermState)
 }
 
 func deleteChar() {

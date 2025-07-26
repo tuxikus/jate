@@ -1,4 +1,4 @@
-package main
+package editor
 
 func moveCursorUp() {
 	var row *EditorRow

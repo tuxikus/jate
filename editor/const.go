@@ -1,4 +1,4 @@
-package main
+package editor
 
 const VERSION = "0.0.1"
 const TAB_WIDTH = 4

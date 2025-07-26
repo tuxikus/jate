@@ -1,4 +1,4 @@
-package main
+package editor
 
 // used to call 'write' only once per refresh
 type AppendBuffer struct {

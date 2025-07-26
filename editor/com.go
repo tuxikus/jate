@@ -1,4 +1,4 @@
-package main
+package editor
 
 import (
 	"strings"
@@ -25,7 +25,7 @@ var commands = Commands{
 		},
 		{
 			name:       "open",
-			candidates: getPwdFiles(),
+			candidates: getFiles("."),
 		},
 	},
 }
@@ -58,7 +58,14 @@ func executeCommand() {
 		setStatusMessage("%s", "not implemented yet")
 		// open
 	} else if strings.HasPrefix(command, "open") {
-		// TODO implement
-		setStatusMessage("%s", "not implemented yet")
+		file := ""
+		ext := ""
+		if len(strings.Split(command, ".")) > 1 {
+			file = strings.Split(command, ".")[1]
+			ext = strings.Split(command, ".")[2]
+		} else {
+			return
+		}
+		FileOpen(file + "." + ext)
 	}
 }

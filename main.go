@@ -1,21 +1,16 @@
 package main
 
 import (
+	"jate/editor"
 	"os"
 )
 
 func main() {
-	enableRawMode()
-	initialize()
+	editor.Initialize()
 
 	if len(os.Args) > 1 {
-		fileOpen(os.Args[1])
+		editor.FileOpen(os.Args[1])
 	}
 
-	setStatusMessage("C-q to quit")
-
-	for {
-		draw()
-		processKeypress()
-	}
+	editor.Run()
 }

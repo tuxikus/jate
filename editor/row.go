@@ -1,4 +1,4 @@
-package main
+package editor
 
 // deletes a row from editor.row
 func rowDelete(at int) {
