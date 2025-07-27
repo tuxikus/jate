@@ -87,6 +87,10 @@ func completion(buf *[]byte) {
 }
 
 func cycleCompletion(buf *[]byte) {
+	if len(lastCommandCandidates) == 0 {
+		return
+	}
+
 	*buf = []byte(fmt.Sprintf("%s.%s", lastCommand, lastCommandCandidates[lastCommandCandidateIdx]))
 
 	if lastCommandCandidateIdx == len(lastCommandCandidates)-1 {

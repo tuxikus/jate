@@ -36,6 +36,9 @@ var commands = Commands{
 			name:       "keyMode",
 			candidates: []string{"emacs", "vi"},
 		},
+		{
+			name: "help",
+		},
 	},
 }
 
@@ -93,6 +96,7 @@ func executeCommand() {
 		} else {
 			return
 		}
-
+	} else if strings.HasPrefix(command, "help") {
+		setStatusMessage("%s", "commands: quit, get, set, open, keyMode, help")
 	}
 }

@@ -70,8 +70,8 @@ func Initialize() {
 	editor.statusMessage = ""
 	editor.fileModified = 0
 	editor.syntax = nil
-	// editor.keyBindingMode = KEY_BINDING_MODE_EMACS
-	editor.keyBindingMode = KEY_BINDING_MODE_VI
+	editor.keyBindingMode = KEY_BINDING_MODE_EMACS
+	// editor.keyBindingMode = KEY_BINDING_MODE_VI
 	editor.viMode = VI_MODE_NORMAL
 
 	columns, rows := getTerminalSize()
