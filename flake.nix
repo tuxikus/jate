@@ -15,6 +15,8 @@
               gdb
               go
               gopls
+              vim
+              delve
             ];
           };
         }

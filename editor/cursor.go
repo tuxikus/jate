@@ -55,7 +55,42 @@ func moveCursorDown() {
 	}
 }
 
-func moveCursorLeft() {
+func moveCursorLeftVi() {
+	if editor.cursorX != 0 {
+		editor.cursorX--
+	}
+}
+
+func moveCursorRightVi() {
+	if editor.cursorX < len(editor.row[editor.cursorY].chars) {
+		editor.cursorX++
+	}
+}
+
+func moveCursorDownVi() {
+	// on last line
+	if editor.cursorY+1 >= editor.rows {
+		return
+	}
+
+	if editor.cursorY < editor.rows {
+		if editor.cursorX > len(editor.row[editor.cursorY+1].chars) {
+			editor.cursorX = len(editor.row[editor.cursorY+1].chars) - 1
+		}
+		editor.cursorY++
+	}
+}
+
+func moveCursorUpVi() {
+	if editor.cursorY > 0 {
+		if editor.cursorX > len(editor.row[editor.cursorY-1].chars) {
+			editor.cursorX = len(editor.row[editor.cursorY-1].chars) - 1
+		}
+		editor.cursorY--
+	}
+}
+
+func moveCursorLeftEmacs() {
 	var row *EditorRow
 
 	if editor.cursorY >= editor.rows {

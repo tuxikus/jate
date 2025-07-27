@@ -108,6 +108,21 @@ const (
 	KEY_M_COLON
 )
 
+const (
+	KEY_BINIDNG_MODE_NORMAL = 0 + iota
+	KEY_BINDING_MODE_EMACS
+	KEY_BINDING_MODE_VI
+)
+
+const (
+	VI_MODE_NORMAL = 0 + iota
+	VI_MODE_INSERT
+	VI_MODE_VISUAL
+)
+
+type KeyBindingMode int
+type ViMode int
+
 // in go chars are runes, so just integer (int32) values
 func readKey() int {
 	buf := make([]byte, 1)
@@ -121,7 +136,7 @@ func readKey() int {
 			} else if err == syscall.EAGAIN {
 				continue
 			} else {
-				panicExit("readKey")
+				panicExit("readKey\n" + err.Error())
 			}
 		}
 		// successfully read one byte
@@ -336,11 +351,24 @@ func readKey() int {
 	return int(c)
 }
 
-var exitTries = 0
-
 func processKeypress() {
 	c := readKey()
 
+	switch editor.keyBindingMode {
+	case KEY_BINIDNG_MODE_NORMAL:
+		processKeyPressNormal(c)
+	case KEY_BINDING_MODE_EMACS:
+		processKeyPressEmacs(c)
+	case KEY_BINDING_MODE_VI:
+		processKeyPressVi(c)
+	}
+}
+
+func processKeyPressNormal(c int) {
+
+}
+
+func processKeyPressEmacs(c int) {
 	switch c {
 	case '\r':
 		insertNewLine()
@@ -367,11 +395,6 @@ func processKeypress() {
 		executeCommand()
 
 	case KEY_C_Q:
-		if editor.fileModified != 0 && exitTries < EXIT_TRIES {
-			setStatusMessage("File modified, exit without saving? Press C-q %d more times", EXIT_TRIES-exitTries)
-			exitTries++
-			return
-		}
 		normalExit()
 
 	case KEY_BACKSPACE:
@@ -417,7 +440,7 @@ func processKeypress() {
 		moveCursorUp()
 
 	case KEY_C_B, KEY_ARROW_LEFT:
-		moveCursorLeft()
+		moveCursorLeftEmacs()
 
 	case KEY_C_F, KEY_ARROW_RIGHT:
 		moveCursorRight()
@@ -425,6 +448,57 @@ func processKeypress() {
 	default:
 		insertChar(c)
 	}
-
-	exitTries = 0
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//                                  vi stuff                                 //
+///////////////////////////////////////////////////////////////////////////////
+
+func processKeyPressVi(c int) {
+	switch editor.viMode {
+	case VI_MODE_NORMAL:
+		switch c {
+		case 'h':
+			moveCursorLeftVi()
+		case 'l':
+			moveCursorRightVi()
+		case 'j':
+			moveCursorDownVi()
+		case 'k':
+			moveCursorUpVi()
+		case 'i':
+			viEnableInsertMode()
+			return
+		case ':':
+			executeCommand()
+		}
+	case VI_MODE_INSERT:
+		switch c {
+		case KEY_BACKSPACE:
+			deleteChar()
+		case '\x1b':
+			viEnableNormalMode()
+		default:
+			insertChar(c)
+		}
+	case VI_MODE_VISUAL:
+		switch c {
+		case '\x1b':
+			viEnableNormalMode()
+		}
+
+	}
+
+}
+
+func viEnableInsertMode() {
+	editor.viMode = VI_MODE_INSERT
+}
+
+func viEnableNormalMode() {
+	editor.viMode = VI_MODE_NORMAL
+}
+
+// func viEnableVisualMode() {
+//	editor.viMode = VI_MODE_VISUAL
+// }

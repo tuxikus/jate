@@ -5,11 +5,13 @@ import (
 	"time"
 )
 
+// TODO: move logic
 func drawStatusBar(ab *AppendBuffer) {
 	appendBufferAppend(ab, []byte("\x1b[7m"))
 
 	var fType []byte
 	var fName []byte
+	var viMode []byte
 
 	if editor.syntax != nil && editor.syntax.fileType != nil {
 		fType = []byte("[" + string(editor.syntax.fileType) + "]")
@@ -23,7 +25,18 @@ func drawStatusBar(ab *AppendBuffer) {
 		fName = []byte("-")
 	}
 
-	left := fmt.Sprintf(" %s File: %s Lines: %d:%d", fType, fName, editor.rows, editor.cursorY+1)
+	if editor.keyBindingMode == KEY_BINDING_MODE_VI {
+		switch editor.viMode {
+		case VI_MODE_NORMAL:
+			viMode = []byte("NORMAL")
+		case VI_MODE_INSERT:
+			viMode = []byte("INSERT")
+		case VI_MODE_VISUAL:
+			viMode = []byte("VISUAL")
+		}
+	}
+
+	left := fmt.Sprintf(" %s %s File: %s Lines: %d:%d", viMode, fType, fName, editor.rows, editor.cursorY+1)
 	if editor.fileModified != 0 {
 		left += " -modified-"
 	}

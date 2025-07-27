@@ -1,8 +1,9 @@
 package editor
 
 import (
-	"golang.org/x/term" // used to enable raw mode or get the terminal size, maybe change to syscalls directly
 	"os"
+
+	"golang.org/x/term" // used to enable raw mode or get the terminal size, maybe change to syscalls directly
 )
 
 // type to store information about a row (line)
@@ -20,20 +21,22 @@ type EditorRow struct {
 
 // type to store global editor stuff
 type Editor struct {
-	cursorX       int
-	cursorY       int
-	renderX       int
-	rowOffset     int // index of row[]
-	columnOffset  int // index of row.chars[]
-	screenRows    int
-	screenColumns int
-	rows          int
-	row           []EditorRow
-	filename      string
-	fileModified  int
-	statusMessage string
-	syntax        *Syntax
-	oldTermState  *term.State // used to restore the terminal config after enabling raw mode
+	cursorX        int
+	cursorY        int
+	renderX        int
+	rowOffset      int // index of row[]
+	columnOffset   int // index of row.chars[]
+	screenRows     int
+	screenColumns  int
+	rows           int
+	row            []EditorRow
+	keyBindingMode KeyBindingMode
+	viMode         ViMode
+	filename       string
+	fileModified   int
+	statusMessage  string
+	syntax         *Syntax
+	oldTermState   *term.State // used to restore the terminal config after enabling raw mode
 }
 
 var editor = Editor{
@@ -67,6 +70,9 @@ func Initialize() {
 	editor.statusMessage = ""
 	editor.fileModified = 0
 	editor.syntax = nil
+	// editor.keyBindingMode = KEY_BINDING_MODE_EMACS
+	editor.keyBindingMode = KEY_BINDING_MODE_VI
+	editor.viMode = VI_MODE_NORMAL
 
 	columns, rows := getTerminalSize()
 	editor.screenColumns = columns

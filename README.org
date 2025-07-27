@@ -36,21 +36,32 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
   - [ ] display git branch
   - [X] display current line
 - [ ] prefix key
-- [-] basic Emacs key bindings
-  - [X] C-a (beginning-of-line)
-  - [X] C-e (end-of-line)
-  - [X] C-p (previous-line)
-  - [X] C-n (next-line)
-  - [X] C-f (forward-char)
-  - [X] C-b (backward-char)
-  - [X] C-d (delete-char)
-  - [X] M-f (forward-word)
-  - [X] M-b (backward-word)
-  - [X] M-m (back-to-indentation)
-    - [X] allow M- key bindings
-  - [ ] M-d (kill-word)
-  - [X] C-k (kill-line)
-- [ ] Vi key bindings
+- [-] Emacs bindings
+  - [-] basic Emacs key bindings
+    - [X] C-a (beginning-of-line)
+    - [X] C-e (end-of-line)
+    - [X] C-p (previous-line)
+    - [X] C-n (next-line)
+    - [X] C-f (forward-char)
+    - [X] C-b (backward-char)
+    - [X] C-d (delete-char)
+    - [X] M-f (forward-word)
+    - [X] M-b (backward-word)
+    - [X] M-m (back-to-indentation)
+      - [X] allow M- key bindings
+    - [ ] M-d (kill-word)
+    - [X] C-k (kill-line)
+- [-] Vi bindings
+  - [ ] full vi bindings
+  - [X] basic vi bindings
+    - [X] normal mode
+    - [X] insert mode
+    - [X] l (normal mode)
+    - [X] h (normal mode)
+    - [X] j (normal mode)
+    - [X] k (normal mode)
+    - [X] i (normal mode)
+    - [X] ESC (insert mode)
 - [X] fix (back-to-indentation)
 - [X] fix (forward-word) and (backward-word), both panic at start or end of line
 - [ ] fix (backward-word) by tab at the beginning of the line/row
