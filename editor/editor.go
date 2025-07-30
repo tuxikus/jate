@@ -31,6 +31,8 @@ type Editor struct {
 	rows           int
 	row            []EditorRow
 	keyBindingMode KeyBindingMode
+	keymap         keymap
+	keymapBindings keymapBindings
 	viMode         ViMode
 	filename       string
 	fileModified   int
@@ -73,6 +75,9 @@ func Initialize() {
 	editor.keyBindingMode = KEY_BINDING_MODE_EMACS
 	// editor.keyBindingMode = KEY_BINDING_MODE_VI
 	editor.viMode = VI_MODE_NORMAL
+	editor.keymap = KEYMAP_NORMAL
+	//editor.keymapBindings = normalKeymapBindings
+	editor.keymapBindings = emacsKeymapBindings
 
 	columns, rows := getTerminalSize()
 	editor.screenColumns = columns

@@ -23,6 +23,7 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
 - [ ] fix highlighting
 - [ ] add debug system
 - [ ] load other files
+- [ ] terminal resizing
 - [-] basic command system
   - [X] quit command
   - [ ] command aliases
@@ -35,7 +36,7 @@ the kilo editor I recommend Paige Ruten's [[https://viewsourcecode.org/snaptoken
   - [X] display current time
   - [ ] display git branch
   - [X] display current line
-- [ ] prefix key
+- [X] prefix key (working for Emacs bindings)
 - [-] Emacs bindings
   - [-] basic Emacs key bindings
     - [X] C-a (beginning-of-line)

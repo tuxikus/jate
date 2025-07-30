@@ -354,151 +354,95 @@ func readKey() int {
 func processKeypress() {
 	c := readKey()
 
-	switch editor.keyBindingMode {
-	case KEY_BINIDNG_MODE_NORMAL:
-		processKeyPressNormal(c)
-	case KEY_BINDING_MODE_EMACS:
-		processKeyPressEmacs(c)
-	case KEY_BINDING_MODE_VI:
-		processKeyPressVi(c)
-	}
-}
-
-func processKeyPressNormal(c int) {
-
-}
-
-func processKeyPressEmacs(c int) {
-	switch c {
-	case '\r':
-		insertNewLine()
-
-	case KEY_M_LOWER_M:
-		moveCursorToIndentation()
-
-	case KEY_M_LOWER_F:
-		moveCursorWordForward()
-
-	case KEY_M_LOWER_B:
-		moveCursorWordBackward()
-
-	case KEY_C_K:
-		rowDeleteContent(editor.cursorY)
-
-	case KEY_C_X:
-		fileSave()
-
-	case KEY_C_S:
-		search()
-
-	case KEY_M_COLON:
-		executeCommand()
-
-	case KEY_C_Q:
-		normalExit()
-
-	case KEY_BACKSPACE:
-		deleteChar()
-
-	case KEY_C_D, KEY_DELETE:
-		moveCursorRight()
-		deleteChar()
-
-	case KEY_PAGE_UP:
-		editor.cursorY = editor.rowOffset
-
-		times := editor.screenRows
-		for times > 0 {
-			moveCursorUp()
-			times--
+	if action, exists := editor.keymapBindings[c]; exists {
+		if action != nil {
+			action()
 		}
-
-	case KEY_PAGE_DOWN:
-		editor.cursorY = editor.rowOffset + editor.screenRows - 1
-		if editor.cursorY > editor.rows {
-			editor.cursorY = editor.rows
-		}
-
-		times := 0
-		for times < editor.screenRows {
-			moveCursorDown()
-			times++
-		}
-
-	case KEY_C_E, KEY_END:
-		if editor.cursorY < editor.rows {
-			editor.cursorX = editor.row[editor.cursorY].length
-		}
-
-	case KEY_C_A, KEY_HOME:
-		editor.cursorX = 0
-
-	case KEY_C_N, KEY_ARROW_DOWN:
-		moveCursorDown()
-
-	case KEY_C_P, KEY_ARROW_UP:
-		moveCursorUp()
-
-	case KEY_C_B, KEY_ARROW_LEFT:
-		moveCursorLeftEmacs()
-
-	case KEY_C_F, KEY_ARROW_RIGHT:
-		moveCursorRight()
-
-	default:
+		return
+	} else {
 		insertChar(c)
 	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//                                  vi stuff                                 //
-///////////////////////////////////////////////////////////////////////////////
-
-func processKeyPressVi(c int) {
-	switch editor.viMode {
-	case VI_MODE_NORMAL:
-		switch c {
-		case 'h':
-			moveCursorLeftVi()
-		case 'l':
-			moveCursorRightVi()
-		case 'j':
-			moveCursorDownVi()
-		case 'k':
-			moveCursorUpVi()
-		case 'i':
-			viEnableInsertMode()
-			return
-		case ':':
-			executeCommand()
-		}
-	case VI_MODE_INSERT:
-		switch c {
-		case KEY_BACKSPACE:
-			deleteChar()
-		case '\x1b':
-			viEnableNormalMode()
-		default:
-			insertChar(c)
-		}
-	case VI_MODE_VISUAL:
-		switch c {
-		case '\x1b':
-			viEnableNormalMode()
-		}
-
-	}
 
 }
 
-func viEnableInsertMode() {
-	editor.viMode = VI_MODE_INSERT
-}
+// func processKeyPressEmacs(c int) {
+//	switch c {
+//	case '\r':
+//		insertNewLine()
 
-func viEnableNormalMode() {
-	editor.viMode = VI_MODE_NORMAL
-}
+//	case KEY_M_LOWER_M:
+//		moveCursorToIndentation()
 
-// func viEnableVisualMode() {
-//	editor.viMode = VI_MODE_VISUAL
+//	case KEY_M_LOWER_F:
+//		moveCursorWordForward()
+
+//	case KEY_M_LOWER_B:
+//		moveCursorWordBackward()
+
+//	case KEY_C_K:
+//		rowDeleteContent(editor.cursorY)
+
+//	case KEY_C_X:
+//		fileSave()
+
+//	case KEY_C_S:
+//		search()
+
+//	case KEY_M_COLON:
+//		executeCommand()
+
+//	case KEY_C_Q:
+//		normalExit()
+
+//	case KEY_BACKSPACE:
+//		deleteChar()
+
+//	case KEY_C_D, KEY_DELETE:
+//		moveCursorRight()
+//		deleteChar()
+
+//	case KEY_PAGE_UP:
+//		editor.cursorY = editor.rowOffset
+
+//		times := editor.screenRows
+//		for times > 0 {
+//			moveCursorUp()
+//			times--
+//		}
+
+//	case KEY_PAGE_DOWN:
+//		editor.cursorY = editor.rowOffset + editor.screenRows - 1
+//		if editor.cursorY > editor.rows {
+//			editor.cursorY = editor.rows
+//		}
+
+//		times := 0
+//		for times < editor.screenRows {
+//			moveCursorDown()
+//			times++
+//		}
+
+//	case KEY_C_E, KEY_END:
+//		if editor.cursorY < editor.rows {
+//			editor.cursorX = editor.row[editor.cursorY].length
+//		}
+
+//	case KEY_C_A, KEY_HOME:
+//		editor.cursorX = 0
+
+//	case KEY_C_N, KEY_ARROW_DOWN:
+//		moveCursorDown()
+
+//	case KEY_C_P, KEY_ARROW_UP:
+//		moveCursorUp()
+
+//	case KEY_C_B, KEY_ARROW_LEFT:
+//		moveCursorLeftEmacs()
+
+//	case KEY_C_F, KEY_ARROW_RIGHT:
+//		moveCursorRight()
+
+//	default:
+//		insertChar(c)
+//	}
 // }
