@@ -1,24 +1,15 @@
 package editor
 
+///////////////////////////////////////////////////////////////////////////////
+//                                   Normal                                  //
+///////////////////////////////////////////////////////////////////////////////
+
 func moveCursorUp() {
-	var row *EditorRow
-
-	if editor.cursorY >= editor.rows {
-		row = nil
-	} else {
-		row = &editor.row[editor.cursorY]
-	}
-
 	if editor.cursorY > 0 {
 		editor.cursorY--
 	}
 
-	if editor.cursorY >= editor.rows {
-		row = nil
-	} else {
-		// get the new row if y changed
-		row = &editor.row[editor.cursorY]
-	}
+	row := getCurrentRow()
 
 	// check if cursor is past the row length
 	if row != nil {
@@ -30,22 +21,11 @@ func moveCursorUp() {
 }
 
 func moveCursorDown() {
-	var row *EditorRow
-
-	if editor.cursorY >= editor.rows {
-		row = nil
-	} else {
-		row = &editor.row[editor.cursorY]
-	}
 	if editor.cursorY < editor.rows {
 		editor.cursorY++
 	}
-	if editor.cursorY >= editor.rows {
-		row = nil
-	} else {
-		// get the new row if y changed
-		row = &editor.row[editor.cursorY]
-	}
+
+	row := getCurrentRow()
 
 	// check if cursor is past the row length
 	if row != nil {
@@ -54,6 +34,144 @@ func moveCursorDown() {
 		}
 	}
 }
+
+func moveCursorLeft() {
+	if editor.cursorX != 0 {
+		editor.cursorX--
+	} else if editor.cursorY > 0 {
+		editor.cursorY--
+		editor.cursorX = len(editor.row[editor.cursorY].chars)
+	}
+
+	row := getCurrentRow()
+
+	// check if cursor is past the row length
+	if row != nil {
+		if editor.cursorX > row.length {
+			editor.cursorX = row.length
+		}
+	}
+}
+
+func moveCursorRight() {
+	row := getCurrentRow()
+
+	if row != nil && editor.cursorX < row.length {
+		editor.cursorX++
+	} else if row != nil && editor.cursorX == row.length {
+		editor.cursorY++
+		editor.cursorX = 0
+	}
+
+	row = getCurrentRow()
+
+	// check if cursor is past the row length
+	if row != nil {
+		if editor.cursorX > row.length {
+			editor.cursorX = row.length
+		}
+	}
+}
+
+func moveCursorToBeginning() {
+	editor.cursorX = 0
+}
+
+func moveCursorToEnd() {
+	editor.cursorX = len(getCurrentRow().chars)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                   Emacs                                   //
+///////////////////////////////////////////////////////////////////////////////
+
+func previousLine() {
+	if editor.cursorY > 0 {
+		editor.cursorY--
+	}
+
+	row := getCurrentRow()
+
+	// check if cursor is past the row length
+	if row != nil {
+		if editor.cursorX > row.length {
+			editor.cursorX = row.length
+		}
+	}
+
+}
+
+func nextLine() {
+	if editor.cursorY < editor.rows {
+		editor.cursorY++
+	}
+
+	row := getCurrentRow()
+
+	// check if cursor is past the row length
+	if row != nil {
+		if editor.cursorX > row.length {
+			editor.cursorX = row.length
+		}
+	}
+}
+
+func forwardChar() {
+	if editor.cursorX != 0 {
+		editor.cursorX--
+	} else if editor.cursorY > 0 {
+		editor.cursorY--
+		editor.cursorX = len(editor.row[editor.cursorY].chars)
+	}
+
+	row := getCurrentRow()
+
+	// check if cursor is past the row length
+	if row != nil {
+		if editor.cursorX > row.length {
+			editor.cursorX = row.length
+		}
+	}
+}
+
+func backwardChar() {
+	row := getCurrentRow()
+
+	if row != nil && editor.cursorX < row.length {
+		editor.cursorX++
+	} else if row != nil && editor.cursorX == row.length {
+		editor.cursorY++
+		editor.cursorX = 0
+	}
+
+	row = getCurrentRow()
+
+	// check if cursor is past the row length
+	if row != nil {
+		if editor.cursorX > row.length {
+			editor.cursorX = row.length
+		}
+	}
+}
+
+func moveBeginningOfLine() {
+	editor.cursorX = 0
+}
+
+func moveEndOfLine() {
+	editor.cursorX = len(getCurrentRow().chars)
+}
+
+func backToIndentation() {
+	row := getCurrentRow()
+	if row != nil {
+		editor.cursorX = getIndexOfFirstNonWhitespaceChar(row)
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                     Vi                                    //
+///////////////////////////////////////////////////////////////////////////////
 
 func moveCursorLeftVi() {
 	if editor.cursorX != 0 {
@@ -87,68 +205,6 @@ func moveCursorUpVi() {
 			editor.cursorX = len(editor.row[editor.cursorY-1].chars) - 1
 		}
 		editor.cursorY--
-	}
-}
-
-func moveCursorLeftEmacs() {
-	var row *EditorRow
-
-	if editor.cursorY >= editor.rows {
-		row = nil
-	} else {
-		row = &editor.row[editor.cursorY]
-	}
-
-	if editor.cursorX != 0 {
-		editor.cursorX--
-	} else if editor.cursorY > 0 {
-		editor.cursorY--
-		editor.cursorX = editor.row[editor.cursorY].length
-	}
-
-	if editor.cursorY >= editor.rows {
-		row = nil
-	} else {
-		// get the new row if y changed
-		row = &editor.row[editor.cursorY]
-	}
-
-	// check if cursor is past the row length
-	if row != nil {
-		if editor.cursorX > row.length {
-			editor.cursorX = row.length
-		}
-	}
-}
-
-func moveCursorRight() {
-	var row *EditorRow
-
-	if editor.cursorY >= editor.rows {
-		row = nil
-	} else {
-		row = &editor.row[editor.cursorY]
-	}
-
-	if row != nil && editor.cursorX < row.length {
-		editor.cursorX++
-	} else if row != nil && editor.cursorX == row.length {
-		editor.cursorY++
-		editor.cursorX = 0
-	}
-
-	if editor.cursorY >= editor.rows {
-		row = nil
-	} else {
-		// get the new row if y changed
-		row = &editor.row[editor.cursorY]
-	}
-
-	// check if cursor is past the row length
-	if row != nil {
-		if editor.cursorX > row.length {
-			editor.cursorX = row.length
-		}
 	}
 }
 

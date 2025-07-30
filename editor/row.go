@@ -1,5 +1,28 @@
 package editor
 
+func getCurrentRow() *EditorRow {
+	var row *EditorRow
+
+	if editor.cursorY >= editor.rows {
+		row = nil
+	} else {
+		row = &editor.row[editor.cursorY]
+	}
+
+	return row
+}
+
+// TODO: test
+func getIndexOfFirstNonWhitespaceChar(row *EditorRow) int {
+	for i, char := range row.chars {
+		if char != ' ' && char != '\t' {
+			return i
+		}
+	}
+
+	return len(row.chars)
+}
+
 // deletes a row from editor.row
 func rowDelete(at int) {
 	if at < 0 || at >= editor.rows {
