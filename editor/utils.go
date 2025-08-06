@@ -91,6 +91,9 @@ func isSymbol(c byte) bool {
 		'|',
 		'}',
 		'~',
+		' ',
+		'\t',
+		'\r',
 	}
 	if slices.Contains(symbols, c) {
 		return true

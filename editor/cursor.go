@@ -9,12 +9,12 @@ func moveCursorUp() {
 		editor.cursorY--
 	}
 
-	row := getCurrentRow()
+	currentRow := getCurrentRow()
 
 	// check if cursor is past the row length
-	if row != nil {
-		if editor.cursorX > row.length {
-			editor.cursorX = row.length
+	if currentRow != nil {
+		if editor.cursorX > currentRow.length {
+			editor.cursorX = currentRow.length
 		}
 	}
 
@@ -25,12 +25,12 @@ func moveCursorDown() {
 		editor.cursorY++
 	}
 
-	row := getCurrentRow()
+	currentRow := getCurrentRow()
 
 	// check if cursor is past the row length
-	if row != nil {
-		if editor.cursorX > row.length {
-			editor.cursorX = row.length
+	if currentRow != nil {
+		if editor.cursorX > currentRow.length {
+			editor.cursorX = currentRow.length
 		}
 	}
 }
@@ -43,32 +43,32 @@ func moveCursorLeft() {
 		editor.cursorX = len(editor.row[editor.cursorY].chars)
 	}
 
-	row := getCurrentRow()
+	currentRow := getCurrentRow()
 
 	// check if cursor is past the row length
-	if row != nil {
-		if editor.cursorX > row.length {
-			editor.cursorX = row.length
+	if currentRow != nil {
+		if editor.cursorX > currentRow.length {
+			editor.cursorX = currentRow.length
 		}
 	}
 }
 
 func moveCursorRight() {
-	row := getCurrentRow()
+	currentRow := getCurrentRow()
 
-	if row != nil && editor.cursorX < row.length {
+	if currentRow != nil && editor.cursorX < currentRow.length {
 		editor.cursorX++
-	} else if row != nil && editor.cursorX == row.length {
+	} else if currentRow != nil && editor.cursorX == currentRow.length {
 		editor.cursorY++
 		editor.cursorX = 0
 	}
 
-	row = getCurrentRow()
+	currentRow = getCurrentRow()
 
 	// check if cursor is past the row length
-	if row != nil {
-		if editor.cursorX > row.length {
-			editor.cursorX = row.length
+	if currentRow != nil {
+		if editor.cursorX > currentRow.length {
+			editor.cursorX = currentRow.length
 		}
 	}
 }
@@ -90,12 +90,12 @@ func previousLine() {
 		editor.cursorY--
 	}
 
-	row := getCurrentRow()
+	currentRow := getCurrentRow()
 
 	// check if cursor is past the row length
-	if row != nil {
-		if editor.cursorX > row.length {
-			editor.cursorX = row.length
+	if currentRow != nil {
+		if editor.cursorX > currentRow.length {
+			editor.cursorX = currentRow.length
 		}
 	}
 
@@ -106,17 +106,17 @@ func nextLine() {
 		editor.cursorY++
 	}
 
-	row := getCurrentRow()
+	currentRow := getCurrentRow()
 
 	// check if cursor is past the row length
-	if row != nil {
-		if editor.cursorX > row.length {
-			editor.cursorX = row.length
+	if currentRow != nil {
+		if editor.cursorX > currentRow.length {
+			editor.cursorX = currentRow.length
 		}
 	}
 }
 
-func forwardChar() {
+func backwardChar() {
 	if editor.cursorX != 0 {
 		editor.cursorX--
 	} else if editor.cursorY > 0 {
@@ -124,32 +124,32 @@ func forwardChar() {
 		editor.cursorX = len(editor.row[editor.cursorY].chars)
 	}
 
-	row := getCurrentRow()
+	currentRow := getCurrentRow()
 
 	// check if cursor is past the row length
-	if row != nil {
-		if editor.cursorX > row.length {
-			editor.cursorX = row.length
+	if currentRow != nil {
+		if editor.cursorX > currentRow.length {
+			editor.cursorX = currentRow.length
 		}
 	}
 }
 
-func backwardChar() {
-	row := getCurrentRow()
+func forwardChar() {
+	currentRow := getCurrentRow()
 
-	if row != nil && editor.cursorX < row.length {
+	if currentRow != nil && editor.cursorX < currentRow.length {
 		editor.cursorX++
-	} else if row != nil && editor.cursorX == row.length {
+	} else if currentRow != nil && editor.cursorX == currentRow.length {
 		editor.cursorY++
 		editor.cursorX = 0
 	}
 
-	row = getCurrentRow()
+	currentRow = getCurrentRow()
 
 	// check if cursor is past the row length
-	if row != nil {
-		if editor.cursorX > row.length {
-			editor.cursorX = row.length
+	if currentRow != nil {
+		if editor.cursorX > currentRow.length {
+			editor.cursorX = currentRow.length
 		}
 	}
 }
@@ -163,208 +163,42 @@ func moveEndOfLine() {
 }
 
 func backToIndentation() {
-	row := getCurrentRow()
-	if row != nil {
-		editor.cursorX = getIndexOfFirstNonWhitespaceChar(row)
+	currentRow := getCurrentRow()
+	if currentRow != nil {
+		editor.cursorX = getIndexOfFirstNonWhitespaceChar(currentRow)
+	}
+}
+
+func forwardWord() {
+	if indexOfWordEnd := getIndexOfWordEnd(); indexOfWordEnd != 0 {
+		editor.cursorX = indexOfWordEnd
+	} else {
+		if indexOfNextWord := getIndexOfNextWord(); indexOfNextWord == 0 {
+			editor.cursorX = 0
+			editor.cursorY++
+			forwardWord()
+		} else {
+			editor.cursorX = getIndexOfNextWord()
+			forwardWord()
+		}
+	}
+}
+
+func backwardWord() {
+	if indexOfWordBeginning := getIndexOfWordBeginning(); indexOfWordBeginning != editor.cursorX {
+		editor.cursorX = indexOfWordBeginning
+	} else {
+		if editor.cursorX == 0 && editor.cursorY != 0 {
+			editor.cursorY--
+			editor.cursorX = len(editor.row[editor.cursorY].chars)
+			backwardWord()
+		} else {
+			editor.cursorX = getIndexOfPreviousWord()
+			backwardWord()
+		}
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                     Vi                                    //
 ///////////////////////////////////////////////////////////////////////////////
-
-func moveCursorLeftVi() {
-	if editor.cursorX != 0 {
-		editor.cursorX--
-	}
-}
-
-func moveCursorRightVi() {
-	if editor.cursorX < len(editor.row[editor.cursorY].chars) {
-		editor.cursorX++
-	}
-}
-
-func moveCursorDownVi() {
-	// on last line
-	if editor.cursorY+1 >= editor.rows {
-		return
-	}
-
-	if editor.cursorY < editor.rows {
-		if editor.cursorX > len(editor.row[editor.cursorY+1].chars) {
-			editor.cursorX = len(editor.row[editor.cursorY+1].chars) - 1
-		}
-		editor.cursorY++
-	}
-}
-
-func moveCursorUpVi() {
-	if editor.cursorY > 0 {
-		if editor.cursorX > len(editor.row[editor.cursorY-1].chars) {
-			editor.cursorX = len(editor.row[editor.cursorY-1].chars) - 1
-		}
-		editor.cursorY--
-	}
-}
-
-func moveCursorToIndentation() {
-	var row *EditorRow
-
-	if editor.cursorY >= editor.rows {
-		row = nil
-	} else {
-		row = &editor.row[editor.cursorY]
-	}
-
-	x := 0
-	for _, char := range row.chars {
-		if char == ' ' || char == '\t' {
-			x++
-		} else {
-			break
-		}
-	}
-
-	editor.cursorX = x
-}
-
-func moveCursorWordForward() {
-	var row *EditorRow
-	if editor.cursorY >= editor.rows {
-		return
-	} else {
-		row = &editor.row[editor.cursorY]
-	}
-
-	inWord := false
-
-	// if cursor at the end of line move to the next line with chars
-	if editor.cursorX >= len(row.chars) {
-		editor.cursorX = 0
-		editor.cursorY++
-
-		if editor.cursorY >= editor.rows {
-			return
-		}
-
-		row = &editor.row[editor.cursorY]
-
-		// find next row with non symbol chars
-		for {
-			if len(row.chars) != 0 && rowContainsLetterOrDigit(row) {
-				return
-			} else {
-				editor.cursorY++
-				row = &editor.row[editor.cursorY]
-			}
-		}
-
-	}
-
-	if !isSymbol(row.chars[editor.cursorX]) {
-		inWord = true
-	}
-
-	for i := editor.cursorX; i < len(editor.row[editor.cursorY].chars); i++ {
-		// if in word move the cursor to the end of the word
-		if inWord {
-			if isSymbol(row.chars[editor.cursorX]) {
-				return
-			}
-			editor.cursorX++
-			// if not in word move the cursor to the next word and
-			// set inWord to true and move to the end of this word
-		} else {
-			editor.cursorX++
-
-			if editor.cursorX >= len(row.chars) {
-				editor.cursorX = 0
-				editor.cursorY++
-				row = &editor.row[editor.cursorY]
-				for len(row.chars) == 0 {
-					editor.cursorY++
-					row = &editor.row[editor.cursorY]
-				}
-			}
-
-			if !isSymbol(row.chars[editor.cursorX]) {
-				inWord = true
-			}
-		}
-	}
-}
-
-func moveCursorWordBackward() {
-	var row *EditorRow
-
-	if editor.cursorY >= editor.rows {
-		row = nil
-	} else {
-		row = &editor.row[editor.cursorY]
-	}
-
-	// if cursor at the beginning of line move to the previous line with chars
-	if editor.cursorX == 0 {
-		editor.cursorY--
-
-		if editor.cursorY < 0 {
-			return
-		}
-
-		row = &editor.row[editor.cursorY]
-		editor.cursorX = len(row.chars)
-
-		for len(row.chars) == 0 {
-			editor.cursorY--
-			row = &editor.row[editor.cursorY]
-			editor.cursorX = len(row.chars)
-		}
-	}
-
-	inWord := false
-	toNextWord := false
-
-	if editor.cursorX >= len(row.chars) {
-		editor.cursorX = len(row.chars) - 1
-	}
-
-	if !isSymbol(row.chars[editor.cursorX]) {
-		inWord = true
-
-		if editor.cursorX-1 <= 0 {
-			return
-		}
-
-		if isSymbol(row.chars[editor.cursorX-1]) {
-			setStatusMessage("to next word")
-			toNextWord = true
-			inWord = false
-		}
-	}
-
-	for {
-		if editor.cursorX-1 <= 0 {
-			editor.cursorX = 0
-			return
-		}
-
-		if inWord {
-			if isSymbol(row.chars[editor.cursorX-1]) {
-				return
-			}
-			editor.cursorX--
-		} else if toNextWord {
-			editor.cursorX--
-			if !isSymbol(row.chars[editor.cursorX]) {
-				inWord = true
-				toNextWord = false
-			}
-		} else {
-			editor.cursorX--
-			if !isSymbol(row.chars[editor.cursorX]) {
-				inWord = true
-			}
-		}
-	}
-}

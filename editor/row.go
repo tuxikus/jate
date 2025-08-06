@@ -1,5 +1,85 @@
 package editor
 
+// TODO: write test
+func getIndexOfPreviousWord() int {
+	currentRow := getCurrentRow()
+
+	for i := editor.cursorX - 1; i > 0; i-- {
+		if !isSymbol(currentRow.chars[i]) {
+			return i
+		}
+	}
+
+	return -1
+}
+
+// TODO: write test
+func getIndexOfWordBeginning() int {
+	currentRow := getCurrentRow()
+
+	for i := editor.cursorX - 1; i >= 0; i-- {
+		if currentChar := currentRow.chars[i]; isSymbol(currentChar) {
+			return i + 1
+		}
+	}
+
+	return 0
+}
+
+// TODO: write test
+// only works if cursor is on whitespace or symbol
+func getIndexOfNextWord() int {
+	currentRow := getCurrentRow()
+
+	for i := editor.cursorX; i < len(currentRow.chars); i++ {
+		if !isSymbol(currentRow.chars[i]) {
+			return i
+		}
+	}
+
+	return 0
+}
+
+// TODO: write test
+// if cursor is in a word return the index of the end of this word
+// if cursor is not in a word return -1
+func getIndexOfWordEnd() int {
+	currentRow := getCurrentRow()
+
+	// no row: end of file or empty file
+	if currentRow == nil {
+		return -1
+	}
+
+	if editor.cursorX >= len(currentRow.chars) {
+		return 0
+	}
+
+	if isSymbol(currentRow.chars[editor.cursorX]) {
+		return 0
+	}
+
+	for i := editor.cursorX; i < len(currentRow.chars); i++ {
+		// TODO: fix if symbols after last word
+		// last word of line
+		if currentRowLength := len(currentRow.chars); i == currentRowLength-1 {
+			return currentRowLength
+		}
+
+		if currentChar := currentRow.chars[i]; isSymbol(currentChar) {
+			return i
+		}
+	}
+
+	return 0
+}
+
+// TODO: write test
+func getCurrentChar() byte {
+	return getCurrentRow().chars[editor.cursorX]
+}
+
+// TODO: write test
 func getCurrentRow() *EditorRow {
 	var row *EditorRow
 
