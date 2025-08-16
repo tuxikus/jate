@@ -1,3 +1,6 @@
+// this file maps keyboard inputs to
+// editor actions like cursor movement
+
 package editor
 
 const (
@@ -53,6 +56,8 @@ var emacsKeymapBindings = keymapBindings{
 	KEY_BACKSPACE: deleteChar,
 }
 
+// prefix implementation
+// return the action as a function
 func prefix(prefixKey int) func() {
 	c := readKey()
 

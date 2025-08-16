@@ -1,6 +1,8 @@
+// the append buffer (ab) is used to call the
+// write syscall only once per 'frame'
+
 package editor
 
-// used to call 'write' only once per refresh
 type AppendBuffer struct {
 	chars []byte
 }
