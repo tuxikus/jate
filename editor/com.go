@@ -83,19 +83,7 @@ func executeCommand() {
 		}
 		FileOpen(file + "." + ext)
 	} else if strings.HasPrefix(command, "keyMode") {
-		mode := ""
-		if len(strings.Split(command, ".")) > 1 {
-			mode = strings.Split(command, ".")[1]
 
-			switch mode {
-			case "emacs":
-				editor.keyBindingMode = KEY_BINDING_MODE_EMACS
-			case "vi":
-				editor.keyBindingMode = KEY_BINDING_MODE_VI
-			}
-		} else {
-			return
-		}
 	} else if strings.HasPrefix(command, "help") {
 		setStatusMessage("%s", "commands: quit, get, set, open, keyMode, help")
 	}

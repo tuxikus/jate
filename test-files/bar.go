@@ -3,7 +3,7 @@ package testfiles
 import "fmt"
 
 func main() {
-	myInt := 1337 hello
+	myInt := 1337
 	var i int
 	i := -12
 

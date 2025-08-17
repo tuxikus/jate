@@ -81,7 +81,7 @@ func drawRows(ab *AppendBuffer) {
 			drawEnd := min(drawStart+editor.screenColumns, len(editor.row[filerow].render))
 
 			// no color
-			//appendBufferAppend(ab, editor.row[filerow].render[drawStart:drawEnd])
+			// appendBufferAppend(ab, editor.row[filerow].render[drawStart:drawEnd])
 
 			// some color
 			rowChars := editor.row[filerow].render[drawStart:drawEnd]
