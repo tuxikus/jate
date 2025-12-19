@@ -124,6 +124,10 @@ func deleteChar() {
 }
 
 func insertChar(c int) {
+	if c < 32 || c > 126 {
+		return
+	}
+
 	if editor.cursorY == editor.rows {
 		insertRow(editor.rows, "")
 	}
