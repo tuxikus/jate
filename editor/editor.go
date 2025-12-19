@@ -70,7 +70,7 @@ func Initialize() {
 	editor.statusMessage = ""
 	editor.fileModified = 0
 	editor.syntax = nil
-	editor.keymapBindings = emacsKeymapBindings
+	editor.keymapBindings = normalKeymapBindings
 
 	columns, rows := getTerminalSize()
 	editor.screenColumns = columns
