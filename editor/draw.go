@@ -3,7 +3,6 @@ package editor
 import (
 	"fmt"
 	"os"
-	"unicode"
 )
 
 func draw() {
@@ -80,45 +79,7 @@ func drawRows(ab *AppendBuffer) {
 			drawStart := min(editor.columnOffset, len(editor.row[filerow].render))
 			drawEnd := min(drawStart+editor.screenColumns, len(editor.row[filerow].render))
 
-			// no color
-			// appendBufferAppend(ab, editor.row[filerow].render[drawStart:drawEnd])
-
-			// some color
-			rowChars := editor.row[filerow].render[drawStart:drawEnd]
-			hl := editor.row[filerow].highlight[drawStart:drawEnd]
-			currentColor := -1
-			for i := range drawEnd {
-				// print non-printable chars
-				if unicode.IsControl(rune(rowChars[i])) {
-					sym := make([]byte, 0)
-					if rowChars[i] <= 26 {
-						sym = append(sym, '@', rowChars[i])
-					} else {
-						sym = append(sym, '?')
-					}
-					appendBufferAppend(ab, []byte("\x1b[7m"))
-					appendBufferAppend(ab, sym)
-					appendBufferAppend(ab, []byte("\x1b[m"))
-					if currentColor != -1 {
-						colorString := fmt.Sprintf("\x1b[%dm", currentColor)
-						appendBufferAppend(ab, []byte(colorString))
-					}
-				} else if hl[i] == HL_NORMAL {
-					if currentColor != -1 {
-						appendBufferAppend(ab, []byte("\x1b[39m"))
-						currentColor = -1
-					}
-					appendBufferAppendByte(ab, rowChars[i])
-				} else {
-					color := syntaxToColor(int(hl[i]))
-					if color != currentColor {
-						currentColor = color
-						colorString := fmt.Sprintf("\x1b[%dm", color)
-						appendBufferAppend(ab, []byte(colorString))
-					}
-					appendBufferAppendByte(ab, rowChars[i])
-				}
-			}
+			appendBufferAppend(ab, editor.row[filerow].render[drawStart:drawEnd])
 			appendBufferAppend(ab, []byte("\x1b[39m"))
 		}
 
