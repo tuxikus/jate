@@ -20,12 +20,9 @@ func fileOpen(filename string) {
 		editor.filename = ""
 		editor.statusMessage = ""
 		editor.fileModified = 0
-		editor.syntax = nil
 
 		editor.filename = filename
 	}
-
-	selectSyntax()
 
 	content, err := os.ReadFile(filename)
 	if err != nil {
@@ -49,8 +46,6 @@ func fileSave() {
 	if editor.filename == "" {
 		editor.filename = string(prompt("Save as: ", nil))
 	}
-
-	selectSyntax()
 
 	file, err := os.OpenFile(editor.filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {

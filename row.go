@@ -242,6 +242,4 @@ func updateRow(row *EditorRow) {
 	}
 
 	row.renderLength = len(row.render)
-
-	updateSyntax(row)
 }

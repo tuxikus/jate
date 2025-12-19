@@ -55,9 +55,6 @@ func searchCallback(query []byte, key int) {
 			savedHlLine = current
 			savedHl = row.highlight
 
-			for i := match; i < match+len(query); i++ {
-				row.highlight[i] = HL_SEARCH_MATCH
-			}
 			break
 		}
 	}

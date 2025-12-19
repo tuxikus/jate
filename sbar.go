@@ -13,11 +13,7 @@ func drawStatusBar(ab *AppendBuffer) {
 	var fName []byte
 	var viMode []byte
 
-	if editor.syntax != nil && editor.syntax.fileType != nil {
-		fType = []byte("[" + string(editor.syntax.fileType) + "]")
-	} else {
-		fType = []byte("")
-	}
+	fType = []byte("")
 
 	if editor.filename != "" {
 		fName = []byte(editor.filename)

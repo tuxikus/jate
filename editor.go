@@ -35,7 +35,6 @@ type Editor struct {
 	filename       string
 	fileModified   int
 	statusMessage  string
-	syntax         *Syntax
 	oldTermState   *term.State // used to restore the terminal config after enabling raw mode
 }
 
@@ -69,7 +68,6 @@ func initEditor() {
 	editor.filename = ""
 	editor.statusMessage = ""
 	editor.fileModified = 0
-	editor.syntax = nil
 	editor.keymapBindings = normalKeymapBindings
 
 	columns, rows := getTerminalSize()
