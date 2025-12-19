@@ -1,4 +1,4 @@
-module jate
+module github.com/tuxikus/jate
 
 go 1.24.4
 
