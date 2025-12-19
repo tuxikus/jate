@@ -20,6 +20,15 @@ the kilo editor I recommend Paige Ruten's [tutorial](https://viewsourcecode.org/
 ## Demo
 ![Demo](assets/demo.gif)
 
+
+## Keys
+
+| Key | Action |
+| --- | ------ |
+| Ctrl-s | save |
+| Ctrl-f | search |
+| Ctrl-q | quit |
+
 ## Run
 ```shell
   go run .
