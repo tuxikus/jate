@@ -93,9 +93,7 @@ func insertRow(at int, s string) {
 	editor.row[at].chars = []byte(s)
 	editor.row[at].length = len(editor.row[at].chars)
 	editor.row[at].render = nil
-	editor.row[at].highlight = nil
 	editor.row[at].renderLength = 0
-	editor.row[at].hlOpenComment = 0
 
 	updateRow(&editor.row[at])
 

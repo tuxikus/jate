@@ -10,13 +10,11 @@ import (
 // chars  + length is the content
 // render + renderLength is the rendered content
 type EditorRow struct {
-	length        int
-	renderLength  int
-	chars         []byte
-	render        []byte
-	highlight     []byte
-	idx           int
-	hlOpenComment int
+	length       int
+	renderLength int
+	chars        []byte
+	render       []byte
+	idx          int
 }
 
 // type to store global editor stuff
