@@ -17,6 +17,9 @@ the kilo editor I recommend Paige Ruten's [tutorial](https://viewsourcecode.org/
 </tr>
 </table>
 
+## Demo
+![Demo](assets/demo.gif)
+
 ## Run
 ```shell
   go run .
