@@ -27,7 +27,7 @@ the kilo editor I recommend Paige Ruten's [tutorial](https://viewsourcecode.org/
 | --- | ------ |
 | Ctrl-s | save |
 | Ctrl-f | search |
-| Ctrl-q | quit |
+| Ctrl-c | quit |
 
 ## Run
 ```shell
