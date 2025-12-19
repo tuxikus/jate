@@ -11,11 +11,6 @@ func normalExit() {
 	os.Stdin.Write([]byte("\x1b[H"))  // move cursor to 1 1
 	disableRawMode()
 
-	for _, row := range editor.row {
-		//fmt.Println(row.render)
-		fmt.Println(row.chars)
-	}
-
 	os.Exit(0)
 }
 

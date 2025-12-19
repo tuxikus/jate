@@ -5,16 +5,10 @@ package editor
 
 const (
 	KEYMAP_NORMAL = iota
-	KEYMAP_EMACS
-	KEYMAP_VI
 )
 
 type keymap int
 type keymapBindings map[int]func()
-
-///////////////////////////////////////////////////////////////////////////////
-//                                   Normal                                  //
-///////////////////////////////////////////////////////////////////////////////
 
 var normalKeymapBindings keymapBindings
 
@@ -27,20 +21,12 @@ func initNormalKeymapBindings() keymapBindings {
 		KEY_ARROW_LEFT:  moveCursorLeft,
 		KEY_HOME:        moveCursorToBeginning,
 		KEY_END:         moveCursorToEnd,
-		KEY_M_COLON:     executeCommand,
 		KEY_BACKSPACE:   deleteChar,
+		KEY_C_C:         normalExit,
+		KEY_C_S:         fileSave,
+		KEY_C_F:         search,
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////
-//                                     Vi                                    //
-///////////////////////////////////////////////////////////////////////////////
-
-var viKeymapBindings = keymapBindings{}
-
-///////////////////////////////////////////////////////////////////////////////
-//                                    init                                   //
-///////////////////////////////////////////////////////////////////////////////
 
 func init() {
 	normalKeymapBindings = initNormalKeymapBindings()
