@@ -1,6 +1,5 @@
 // the append buffer (ab) is used to call the
 // write syscall only once per 'frame'
-
 package main
 
 type AppendBuffer struct {
