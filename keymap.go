@@ -7,7 +7,6 @@ const (
 	KEYMAP_NORMAL = iota
 )
 
-type keymap int
 type keymapBindings map[int]func()
 
 var normalKeymapBindings keymapBindings

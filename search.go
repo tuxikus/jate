@@ -36,9 +36,10 @@ func searchCallback(query []byte, key int) {
 	for range editor.row {
 		current += searchDirection
 
-		if current == -1 {
+		switch current {
+		case -1:
 			current = editor.rows - 1
-		} else if current == editor.rows {
+		case editor.rows:
 			current = 0
 		}
 

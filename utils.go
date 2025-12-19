@@ -97,37 +97,3 @@ func isSymbol(c byte) bool {
 	}
 
 }
-
-func rowContainsLetterOrDigit(row *EditorRow) bool {
-	if len(row.chars) == 0 {
-		return false
-	}
-
-	for _, char := range row.chars {
-		if !isSymbol(char) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func getFiles(directory string) []string {
-	var files []string = nil
-
-	dir, err := os.Open(directory)
-	if err != nil {
-		panicExit("getFiles\n" + err.Error())
-	}
-
-	f, err := dir.ReadDir(-1)
-	if err != nil {
-		panicExit("getFiles\n" + err.Error())
-	}
-
-	for _, file := range f {
-		files = append(files, file.Name())
-	}
-
-	return files
-}

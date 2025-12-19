@@ -1,85 +1,6 @@
 package main
 
 // TODO: write test
-func getIndexOfPreviousWord() int {
-	currentRow := getCurrentRow()
-
-	for i := editor.cursorX - 1; i > 0; i-- {
-		if !isSymbol(currentRow.chars[i]) {
-			return i
-		}
-	}
-
-	return -1
-}
-
-// TODO: write test
-func getIndexOfWordBeginning() int {
-	currentRow := getCurrentRow()
-
-	for i := editor.cursorX - 1; i >= 0; i-- {
-		if currentChar := currentRow.chars[i]; isSymbol(currentChar) {
-			return i + 1
-		}
-	}
-
-	return 0
-}
-
-// TODO: write test
-// only works if cursor is on whitespace or symbol
-func getIndexOfNextWord() int {
-	currentRow := getCurrentRow()
-
-	for i := editor.cursorX; i < len(currentRow.chars); i++ {
-		if !isSymbol(currentRow.chars[i]) {
-			return i
-		}
-	}
-
-	return 0
-}
-
-// TODO: write test
-// if cursor is in a word return the index of the end of this word
-// if cursor is not in a word return -1
-func getIndexOfWordEnd() int {
-	currentRow := getCurrentRow()
-
-	// no row: end of file or empty file
-	if currentRow == nil {
-		return -1
-	}
-
-	if editor.cursorX >= len(currentRow.chars) {
-		return 0
-	}
-
-	if isSymbol(currentRow.chars[editor.cursorX]) {
-		return 0
-	}
-
-	for i := editor.cursorX; i < len(currentRow.chars); i++ {
-		// TODO: fix if symbols after last word
-		// last word of line
-		if currentRowLength := len(currentRow.chars); i == currentRowLength-1 {
-			return currentRowLength
-		}
-
-		if currentChar := currentRow.chars[i]; isSymbol(currentChar) {
-			return i
-		}
-	}
-
-	return 0
-}
-
-// TODO: write test
-func getCurrentChar() byte {
-	return getCurrentRow().chars[editor.cursorX]
-}
-
-// TODO: write test
 func getCurrentRow() *EditorRow {
 	var row *EditorRow
 
@@ -90,17 +11,6 @@ func getCurrentRow() *EditorRow {
 	}
 
 	return row
-}
-
-// TODO: test
-func getIndexOfFirstNonWhitespaceChar(row *EditorRow) int {
-	for i, char := range row.chars {
-		if char != ' ' && char != '\t' {
-			return i
-		}
-	}
-
-	return len(row.chars)
 }
 
 // deletes a row from editor.row
@@ -119,24 +29,6 @@ func rowDelete(at int) {
 
 	editor.rows--
 	editor.fileModified++
-}
-
-// delete the content of a row,
-// if the line has no content delete the row
-func rowDeleteContent(at int) {
-	if at < 0 || at >= editor.rows {
-		return
-	}
-
-	row := &editor.row[at]
-
-	if len(row.chars) == 0 {
-		rowDelete(at)
-		return
-	}
-
-	row.chars = make([]byte, 0)
-	updateRow(row)
 }
 
 func rowAppendString(row *EditorRow, s string) {

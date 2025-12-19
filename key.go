@@ -162,7 +162,8 @@ func readKey() int {
 		seq0 := buf[0]
 
 		// if next byte is [
-		if seq0 == '[' {
+		switch seq0 {
+		case '[':
 			buf = make([]byte, 1)
 			if n, err := os.Stdin.Read(buf); err != nil || n != 1 {
 				return '\x1b'
@@ -213,7 +214,7 @@ func readKey() int {
 					return KEY_END
 				}
 			}
-		} else if seq0 == 'O' {
+		case 'O':
 			buf = make([]byte, 1)
 			if n, err := os.Stdin.Read(buf); err != nil || n != 1 {
 				return '\x1b'
@@ -226,7 +227,7 @@ func readKey() int {
 			case 'F':
 				return KEY_END
 			}
-		} else {
+		default:
 			// Meta keys
 			// just esc with a letter
 			// a -> \x1ba

@@ -28,7 +28,7 @@ func prompt(prompt string, promptCallback PromptCallback) []byte {
 		} else if c == '\r' || c == '\n' {
 			if len(buf) != 0 {
 				setStatusMessage("")
-				return buf[:len(buf)]
+				return buf[:]
 			}
 			if promptCallback != nil {
 				promptCallback(buf, c)
