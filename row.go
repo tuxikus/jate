@@ -1,4 +1,4 @@
-package editor
+package main
 
 // TODO: write test
 func getIndexOfPreviousWord() int {

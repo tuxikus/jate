@@ -1,6 +1,6 @@
 // file for ui elements
 
-package editor
+package main
 
 func blankWindow() {
 	editor.cursorX = 0

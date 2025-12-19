@@ -1,7 +1,7 @@
 // this file maps keyboard inputs to
 // editor actions like cursor movement
 
-package editor
+package main
 
 const (
 	KEYMAP_NORMAL = iota
