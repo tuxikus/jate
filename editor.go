@@ -49,14 +49,14 @@ func (e *Editor) setStatusMessage(msg string) {
 	e.statusMessage = msg
 }
 
-func Run() {
+func runEditor() {
 	for {
 		draw()
 		processKeypress()
 	}
 }
 
-func Initialize() {
+func initEditor() {
 	enableRawMode()
 
 	editor.cursorX = 0

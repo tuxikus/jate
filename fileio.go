@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-func FileOpen(filename string) {
+func fileOpen(filename string) {
 	if editor.filename == "" {
 		editor.filename = filename
 	} else {

@@ -222,7 +222,7 @@ func updateRow(row *EditorRow) {
 	}
 
 	// TAB_WIDTH - 1 -> /t already a char
-	size := len(row.chars) + tabs*(TAB_WIDTH-1)
+	size := len(row.chars) + tabs*(TabWidth-1)
 	row.render = make([]byte, 0, size)
 
 	idx := 0
@@ -231,7 +231,7 @@ func updateRow(row *EditorRow) {
 			row.render = append(row.render, ' ')
 			idx++
 			// if char is a tab check idx and add needed spaces to fill the tab
-			for idx%TAB_WIDTH != 0 {
+			for idx%TabWidth != 0 {
 				row.render = append(row.render, ' ')
 				idx++
 			}

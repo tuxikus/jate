@@ -65,7 +65,7 @@ func drawRows(ab *AppendBuffer) {
 				// draw tilde at start of line
 				appendBufferAppend(ab, []byte("~"))
 				// draw line 2
-				messageLine2 := fmt.Sprintf("Version: %s", VERSION)
+				messageLine2 := fmt.Sprintf("Version: %s", Version)
 				padding = ((editor.screenColumns - len(messageLine2)) / 2) - 1 // -1 = tilde
 				for padding > 0 {
 					appendBufferAppend(ab, []byte(" "))

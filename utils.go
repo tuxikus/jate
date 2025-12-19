@@ -27,7 +27,7 @@ func renderXtoCursorX(row *EditorRow, renderX int) int {
 
 	for cursorX := 0; cursorX < len(row.chars); cursorX++ {
 		if row.chars[cursorX] == '\t' {
-			currentRenderX += (TAB_WIDTH - 1) - (currentRenderX % TAB_WIDTH)
+			currentRenderX += (TabWidth - 1) - (currentRenderX % TabWidth)
 		}
 		currentRenderX++
 
@@ -44,7 +44,7 @@ func cursorXToRenderX(row *EditorRow, cursorX int) int {
 	for i := range cursorX {
 		if row.chars[i] == '\t' {
 			// how many columns right to the last tab
-			renderX += TAB_WIDTH - 1 - (renderX % TAB_WIDTH)
+			renderX += TabWidth - 1 - (renderX % TabWidth)
 		}
 		renderX++
 	}
