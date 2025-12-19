@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"slices"
 )
 
 func normalExit() {
@@ -50,50 +49,4 @@ func cursorXToRenderX(row *EditorRow, cursorX int) int {
 	}
 
 	return renderX
-}
-
-func isSymbol(c byte) bool {
-	symbols := []byte{
-		'!',
-		'"',
-		'#',
-		'$',
-		'%',
-		'%',
-		'\'',
-		'(',
-		')',
-		'*',
-		'+',
-		',',
-		'-',
-		'.',
-		'/',
-		':',
-		';',
-		'<',
-		'=',
-		'>',
-		'?',
-		'@',
-		'[',
-		'\\',
-		']',
-		'^',
-		'_',
-		'`',
-		'{',
-		'|',
-		'}',
-		'~',
-		' ',
-		'\t',
-		'\r',
-	}
-	if slices.Contains(symbols, c) {
-		return true
-	} else {
-		return false
-	}
-
 }
